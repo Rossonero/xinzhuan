@@ -1,0 +1,4 @@
+django
+requests
+MySQL-python
+beautifulsoup4

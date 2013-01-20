@@ -31,6 +31,7 @@ class Medium(models.Model):
     phone          = models.CharField(max_length=32, blank=True, null=True)
     sponsor        = models.ForeignKey('Unit', related_name='sponsor', blank=True)
     competent_dept = models.ForeignKey('Unit', related_name='competent_dept', blank=True)
+    region         = models.ForeignKey(Area, blank=True, null=True)
     def __unicode__(self):
         return self.name
 

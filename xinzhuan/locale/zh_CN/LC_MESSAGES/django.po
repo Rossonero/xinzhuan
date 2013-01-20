@@ -1,0 +1,7 @@
+#: views.py:11 templates/home.html:10
+msgid "Chinese"
+msgstr ""
+
+#: templates/base.html:7
+msgid "Xinzhuan"
+msgstr ""

@@ -1,0 +1,26 @@
+{% load i18n %}
+
+<!DOCTYPE HTML>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock %} - {% trans "Xinzhuan" %}</title>
+    {% if request.META.REMOTE_ADDR == '127.0.0.1' %}
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <!-- <link href="/static/css/font-awesome.css" rel="stylesheet"> -->
+    <link href="/static/css/style.less" rel="stylesheet/less" type="text/css">
+    <script type="text/javascript" src="/static/js/less-1.3.1.min.js"></script>
+    {% else %}
+    <link href="/static/css/all.css" type="text/css" rel="stylesheet" charset="utf-8" />
+    {% endif %}
+
+<!--[if lt IE 9]>
+<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+</head>
+<body>
+    <div class="container">
+    {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

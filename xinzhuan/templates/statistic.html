@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% load i18n %}
+
+{% block title %}{{region.en}} - Provincial Media Data{% endblock %}
+
+{% block content %}
+<div class="row">
+    <section class="statistic-filter">
+        <h2>Filter</h2>
+        <ul class="province-tags">
+            <li {% if region.en == "People's Republic of China" %}class="active" {% endif %}><a href="{% url statistic '' %}">All</a></li>
+            {% for province in provinces %}
+            <li {% if province.en == region.en %}class="active" {% endif %}><a href="{% url statistic province.en %}">{{province.en}}</a></li>
+            {% endfor %}
+        </ul>
+        <div class="clearfix"></div>
+        <p class="text-info">* Nationwide media are divided in accordance with address of headquarters.</p>
+    </section>
+    <section class="province-details">
+        <h2>Summary</h2>
+        <div class="row">
+            <div class="span5">
+                <ul class="numbers">
+                    <li><span class="label-category-radio_and_tv">Radio and TV</span><b>{{counters.radio_and_tv}}</b></li>
+                    <li><span class="label-category-newspaper">Nespapaer</span><b>{{counters.newspaper}}</b></li>
+                    <li><span class="label-category-periodical">Periodical</span><b>{{counters.periodical}}</b></li>
+                </ul>
+            </div>
+            <div class="span7">
+                <h4>{{region.en}}</h4>
+                <p class="muted">Shaanxi (help·info) (simplified Chinese: 陕西; traditional Chinese: 陝西; pinyin: Shǎnxī; Wade–Giles: Shan-hsi; Postal map spelling: Shensi) is a province of the People's Republic of China, officially part of the Northwest China region. It includes portions of the Loess Plateau on the middle reaches of the Yellow River in addition </p>
+                <!-- <img src="/static/img/province/shaanxi.jpg" class="thumbnail" /> -->
+            </div>
+        </div>
+    </section>
+    <section class="medium-list">
+        <h2>Detailed List </h2>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Category<a href=""><i class="icon-cog"></i></a></th>
+                    <th>Name</th>
+                    <th>Language</th>
+                </tr>
+            </thead>
+            {% for medium in media %}
+            <tr>
+                <td><span class="label-category-{{medium.category}}">{{medium.get_category_display}}</span></td><td>{{medium.name}}</td><td>{{medium.language}}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        <div class="pagination">
+            <ul>
+                <li><a href="#">«</a></li>
+                <li><a href="#">1</a></li>
+                <li><a href="#">2</a></li>
+                <li><a href="#">3</a></li>
+                <li><a href="#">4</a></li>
+                <li><a href="#">»</a></li>
+            </ul>
+        </div>
+    </section>
+
+    <div class="span4">...</div>
+    <div class="span8">...</div>
+</div>
+
+{% endblock %}

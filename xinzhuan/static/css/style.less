@@ -1,0 +1,128 @@
+html, body {
+    height: 100%;
+    font-family: 'Times New Roman', Arial;
+}
+ol, ul, li { list-style: none;}
+.image (@name, @format: jpg, @repeat: repeat) {
+    @url: "../img/" ;
+    background: url("@{url}@{name}.@{format}") @repeat;
+}
+
+.corners (@radius: 5px) {
+    border-radius: @radius;
+    -webkit-border-radius: @radius;
+    -moz-border-radius: @radius;
+}
+
+.shadow {
+    box-shadow: ~"rgba(200,200,20)";
+    -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075);
+    -khtml-box-shadow: ~"rgba(200,200,200,1) 0 2px 18px";
+    -moz-box-shadow: 0 2px 2px rgba(0, 0, 0, 0.075);
+}
+
+.transition {
+    transition: color .1s linear .1s;
+    -moz-transition-property: color;
+    -moz-transition-timing-function: ease-in;
+    -moz-transition-duration: 1s;
+    -moz-transition-delay: 0;
+    -webkit-transition-property: color;
+    -webkit-transition-timing-function: ease-in;
+    -webkit-transition-duration: 1s;
+    -webkit-transition-delay: 0;
+}
+
+.gradient (@start, @end) {
+   background-image: -moz-linear-gradient(top, @start, @end);
+   background-image: -ms-linear-gradient(top, @start, @end);
+   background-image: -webkit-gradient(linear, 0 0, 0 100%, from(@start), to(@end));
+   background-image: -webkit-linear-gradient(top, @start, @end);
+   background-image: -o-linear-gradient(top, @start, @end);
+   background-image: linear-gradient(top, @start, @end); 
+   background: linear-gradient(top, @start, @end);
+   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=@start, endColorstr=@end);
+}
+
+a {
+    text-decoration: none;
+    color: #FC0000;
+}
+a:hover {
+    text-decoration: none;
+    color: #FF0000;
+}
+.border{
+    background: url(/static/img/border.png);
+background-repeat: repeat-x;
+background-position: left bottom;
+padding-bottom: 10px;
+}
+/* Statistic */
+.statistic-filter{
+    .province-tags{
+        .active{
+            a{
+                color: #fff;
+                background: #212121;
+            }
+        }
+        li{
+            float: left;
+            margin-bottom: 10px;
+            margin-right: 3px;
+        }
+    }
+    a{
+        font-family: Tahoma;
+        padding: 5px;
+        background: #E3E3E3;
+        color: #595959;
+        -moz-transition: all 0.3s ease-in 0;
+        -webkit-transition: all 0.3s ease-in 0;
+        &:hover{
+            color: #fff;
+            background: #212121;
+        }
+    }
+    p{
+        margin-left: 25px;
+    }
+}
+.province-details{
+    .numbers{
+        li{
+            border-bottom: 1px solid #E5E5E5;
+            padding: 8px 5px;
+            color: black;
+            &:hover{
+                background: #fafafa;
+            }
+            b{
+                display: inline-block;
+                width: 145px;
+                font-weight: normal;
+                font-size: 30px;
+                color: #F68E24;
+                float: right;
+                text-align: right;
+            }
+        }
+    }
+}
+
+.label-category (@color){
+    padding: 4px 8px;
+    border: solid 2px @color;
+    color: @color;
+    /*border-top-left-radius: 4px;*/
+}
+.label-category-radio_and_tv{
+    .label-category(#c59098);
+}
+.label-category-newspaper{
+    .label-category(#8aa03c);
+}
+.label-category-periodical{
+    .label-category(#8eb2c8);
+}

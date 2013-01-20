@@ -30,11 +30,6 @@ TIME_ZONE = 'America/Chicago'
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
-gettext = lambda s: s
-LANGUAGES = (
-    ('zh', gettext('Chinese')),
-    ('en', gettext('English')),
-)
 LANGUAGE_CODE = 'en-us'
 
 
@@ -76,6 +71,7 @@ STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
+    os.path.join(PROJECT_ROOT, 'static'),
 )
 
 # List of finder classes that know how to find static files in
@@ -107,6 +103,11 @@ MIDDLEWARE_CLASSES = (
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
+TEMPLATE_CONTEXT_PROCESSORS = (
+    "django.contrib.auth.context_processors.auth",
+    "django.core.context_processors.request",
+)
+
 ROOT_URLCONF = 'xinzhuan.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
@@ -116,6 +117,7 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
+    os.path.join(PROJECT_ROOT, 'templates'),
 )
 
 INSTALLED_APPS = (
