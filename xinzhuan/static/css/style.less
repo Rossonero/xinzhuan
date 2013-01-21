@@ -46,7 +46,7 @@ ol, ul, li { list-style: none;}
 
 a {
     text-decoration: none;
-    color: #FC0000;
+    /*color: #FC0000;*/
 }
 a:hover {
     text-decoration: none;
@@ -95,6 +95,7 @@ padding-bottom: 10px;
             border-bottom: 1px solid #E5E5E5;
             padding: 8px 5px;
             color: black;
+            height: 26px;
             &:hover{
                 background: #fafafa;
             }
@@ -112,9 +113,12 @@ padding-bottom: 10px;
 }
 
 .label-category (@color){
-    padding: 4px 8px;
+    padding: 0px 8px;
     border: solid 2px @color;
     color: @color;
+    float: left;
+    width: 80px;
+    text-align: center;
     /*border-top-left-radius: 4px;*/
 }
 .label-category-radio_and_tv{

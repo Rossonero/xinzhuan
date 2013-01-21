@@ -135,6 +135,8 @@ INSTALLED_APPS = (
     'journalists',
     'media',
     'misc',
+
+    'pure_pagination',
 )
 
 # A sample logging configuration. The only tangible logging
@@ -170,3 +172,8 @@ try:
     execfile(os.path.join(PROJECT_ROOT, 'local_settings.py'))
 except IOError:
     pass
+
+PAGINATION_SETTINGS = {
+    'PAGE_RANGE_DISPLAYED': 10,
+    'MARGIN_PAGES_DISPLAYED': 2,
+}

@@ -30,14 +30,28 @@ def statistic(request, province):
 
     # 分页
     paginator = Paginator(media, 30)
-    page = request.GET.get('page', 1)
     try:
-        page = int(page)
+        page = int(request.GET.get('page', 1))
     except:
         page = 1    
     media = paginator.page(page)
+    
+    if page <= 10:
+        start_page= False
+        end_page = paginator.num_pages > 20 and True or False
+        page_range = paginator.page_range[0:20]
+    elif page > 10 and page < paginator.num_pages - 10:
+        start_page,end_page = True, True
+        page_range = paginator.page_range[page-9:page+10]
+    else:
+        start_page,end_page = True, False
+        page_range = paginator.page_range[page-9:page+10]
 
     ctx = {
+        'paginator' : paginator,
+        'page_range' : page_range,
+        'start_page' : start_page,
+        'end_page' : end_page,
         'region' : region,
         'counters' : counters,
         'media' : media,

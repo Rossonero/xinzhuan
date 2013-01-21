@@ -18,7 +18,7 @@ LANGUAGE_CHOICE = (
 MEDIUM_CATEGORY = (
     ('newspaper','Newspaper'),
     ('periodical','Periodical'),
-    ('radio_and_tv','Radio And Tv'),
+    ('radio_and_tv','Radio and Tv'),
 )
 
 class Medium(models.Model):

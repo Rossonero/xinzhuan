@@ -5,6 +5,7 @@ from django.contrib import admin
 admin.autodiscover()
 
 urlpatterns = patterns('',
+	url(r'^api/', include('api.urls')),
     url(r'^$', 'xinzhuan.views.home'),
     # TODO: FIX IT
     # url(r'^provincial-media-data/', 'xinzhuan.views.statistic'),

@@ -36,34 +36,50 @@
     </section>
     <section class="medium-list">
         <h2>Detailed List </h2>
-        <table class="table table-bordered">
+        <table class="table">
             <thead>
                 <tr>
                     <th>Category<a href=""><i class="icon-cog"></i></a></th>
                     <th>Name</th>
                     <th>Language</th>
+                    <th>Reporters</th>
                 </tr>
             </thead>
             {% for medium in media %}
             <tr>
-                <td><span class="label-category-{{medium.category}}">{{medium.get_category_display}}</span></td><td>{{medium.name}}</td><td>{{medium.language}}</td>
+                <td><span class="label-category-{{medium.category}}">{{medium.get_category_display}}</span></td><td>{{medium.name}}</td><td>{{medium.get_language_display}}</td><td>DETAILS</td>
             </tr>
             {% endfor %}
         </table>
         <div class="pagination">
             <ul>
-                <li><a href="#">«</a></li>
-                <li><a href="#">1</a></li>
-                <li><a href="#">2</a></li>
-                <li><a href="#">3</a></li>
-                <li><a href="#">4</a></li>
-                <li><a href="#">»</a></li>
+                {% if media.has_previous %}
+                <li><a href="?page={{ media.previous_page_number }}{%if request.GET.tag%}&tag={{request.GET.tag}}{%endif%}">«</a></li>
+                {% endif %} 
+                {% if start_page %}
+                <li id="page1"><a href="?page=1">1</a></li>
+                <li id="page2"><a href="?page=2">2</a></li>
+                <li><a href="javascript:void(0)">...</a></li>
+                {% endif %}
+                {% for i in page_range %}
+                <li id="page{{i}}" {{request.GET.page }}><a  href="?page={{i}}{%if request.GET.tag%}&tag={{request.GET.tag}}{%endif%}">{{i}}</a> </li>
+                {% endfor %}
+                {% if end_page %}
+                <li><a href="javascript:void(0)">...</a></li>
+                <li id="page1"><a href="?page={{paginator.num_pages}}">{{paginator.num_pages}}</a></li>
+                {% endif %}
+                {% if media.has_next %}
+                <li><a href="?page={{ media.next_page_number }}{%if request.GET.tag%}&tag={{request.GET.tag}}{%endif%}">»</a></li>
+                {% endif %}
             </ul>
         </div>
     </section>
-
-    <div class="span4">...</div>
-    <div class="span8">...</div>
 </div>
 
+{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript">
+
+</script>
 {% endblock %}
