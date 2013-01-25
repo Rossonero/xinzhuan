@@ -36,18 +36,39 @@
     </section>
     <section class="medium-list">
         <h2>Detailed List </h2>
-        <table class="table">
+        <table class="table table-hover">
             <thead>
                 <tr>
-                    <th>Category<a href=""><i class="icon-cog"></i></a></th>
+                    <th>Category</th>
                     <th>Name</th>
                     <th>Language</th>
-                    <th>Reporters</th>
+                    <th>Journalists</th>
                 </tr>
             </thead>
             {% for medium in media %}
             <tr>
-                <td><span class="label-category-{{medium.category}}">{{medium.get_category_display}}</span></td><td>{{medium.name}}</td><td>{{medium.get_language_display}}</td><td>DETAILS</td>
+                <td><span class="label-category-{{medium.category}}">{{medium.get_category_display}}</span></td><td>{{medium.name}}</td><td>{{medium.get_language_display}}</td><td>{{medium.journalists_link|safe}}</td>
+            </tr>
+            <tr class="medium-detail">
+                <td></td>
+                <td colspan="3">
+                    <dl>
+                        {% if medium.phone %}
+                        <dt>Phone</dt>
+                        <dd>+86 {{medium.phone}}</dd>
+                        {% endif %}
+                        {% if medium.address %}
+                        <dt>Address</dt>
+                        <dd>{{medium.address}}</dd>
+                        {% endif %}
+                        {% if medium.sponsor %}
+                        <dt>Sponsor</dt>
+                        <dd>{{medium.sponsor.name}}</dd>
+                        <dt>Competent Dept</dt>
+                        <dd>{{medium.competent_dept.name}}</dd>
+                        {% endif %}
+                    </dl>
+                </td>
             </tr>
             {% endfor %}
         </table>
@@ -80,6 +101,13 @@
 
 {% block scripts %}
 <script type="text/javascript">
+$('table a').popover({
+    'trigger' : 'hover',
+    'placement' : 'left',
+});
+$('table tr:not(.medium-detail)').click(function(e){
+    $(this).next().fadeToggle();
+});
 
 </script>
 {% endblock %}

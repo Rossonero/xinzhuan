@@ -12,8 +12,10 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 from bs4 import BeautifulSoup
 
+from articles.models import Article
 from media.models import Medium
 from journalists.models import Journalist
+from tools.pyictclas import PyICTCLAS, CodeType, POSMap
 
 import requests
 import json
@@ -54,7 +56,6 @@ class Apis():
         error_dict[72] = '已经申请过了'
         return HttpResponse(json.dumps({'code': code, 'errorMessage': error_dict[code] + extra_message}))
 
-
     def _response(self, data = {}, format='json'):
         '''
         type(data) == __dict__
@@ -85,3 +86,31 @@ class Apis():
 
         return eval(INTERFACES[interface])
 
+    def tools(self, request, interface):
+        INTERFACES = { i : i + '()' for i in ['ictclas', 'add', 'edit', 'resort', 'delete'] }
+
+        def ictclas():
+            ictclas = PyICTCLAS()
+            ictclas.ictclas_init()
+            ictclas.ictclas_setPOSmap(POSMap.ICT_POS_MAP_SECOND)
+            content = request.POST.get('content')
+            word_frequency_limit = request.POST.get('frequency_limit', 3)
+            if not content: content = Article.objects.get(pk=555).content
+            result = ictclas.ictclas_paragraphProcess(content, CodeType.CODE_TYPE_UTF8).value.lstrip()
+            response = {
+                'content' : content,
+                'result' : result,
+            }
+            word_array = []
+            word_frequency = {}
+            allow_parts_of_speech = ['n', 'v', 'a', 'd']
+            for word in result.split(' '):
+                if len(word) > 0 and word[-1] in allow_parts_of_speech: word_array.append(word)
+            for word in set(word_array):
+                if word_array.count(word) > word_frequency_limit: word_frequency[word] = word_array.count(word)
+
+            sorted_word_frequency = sorted(word_frequency.iteritems(), key=lambda (k, v) : (v,k))
+            response['word_frequency'] = list(reversed(sorted_word_frequency))
+            return self._response(response)
+
+        return eval(INTERFACES[interface])

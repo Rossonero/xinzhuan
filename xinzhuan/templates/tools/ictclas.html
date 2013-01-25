@@ -1,0 +1,27 @@
+{% extends "tools/base.html" %}
+
+{% block main %}
+<h2>ICTCLAS</h2>
+<p><a href="http://www.ictclas.org/">ICTCLAS</a> (Institute of Computing Technology,Chinese Lexical Analysis System) is a system developed by Institute of Computing Technology, Chinese Academy of Sciences. This tool power by ICTCLAS, written in Python, can be use to divided Chinese word, tagged part of Chinese word, calculated word frequency.</p>
+<h3>API</h3>
+<code>http://xinzhuan.info/api/tools/ictclas.json</code>
+<h3>Usage</h3>
+<textarea name="" id="" rows="10" style="width:100%;"></textarea>
+<button class="btn">Submit</button> <button class="btn">Example</button>
+<h3>Result</h3>
+<blockquote class="result">
+    <p class="muted">Here will be display the resulting content.</p>
+</blockquote>
+{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript">
+$('.btn').click(function(e){
+    var content = $('textarea').val();
+    $.post('/api/tools/ictclas.json', {'content': content}, function(rsp){
+        $('textarea').val(rsp.response.content);
+        $('.result p').removeClass('muted').text(rsp.response.result);
+    }, 'json');
+});
+</script>
+{% endblock %}

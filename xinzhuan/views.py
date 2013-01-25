@@ -58,3 +58,12 @@ def statistic(request, province):
         'provinces' : Area.objects.filter(parent_id=0).exclude(pk__gt=3352)
     }
     return TemplateResponse(request, 'statistic.html', ctx)
+
+
+def analysis(request):
+    sw = Medium.objects.get(pk=1081)
+    pd = Medium.objects.get(pk=951)
+    ctx = {
+
+    }
+    return TemplateResponse(request, 'analysis.html', ctx)

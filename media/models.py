@@ -3,6 +3,8 @@ from django.db import models
 from django.utils.translation import ugettext as _
 from misc.models import Area
 
+import journalists
+
 LANGUAGE_CHOICE = (
     ('zh', 'Chinese'),
     ('en', 'English'),
@@ -35,6 +37,12 @@ class Medium(models.Model):
     def __unicode__(self):
         return self.name
 
+    def journalists_link(self):
+        count = journalists.models.Journalist.objects.filter(medium=self).count()
+        if count:
+            content = ', '.join([ j.name for j in journalists.models.Journalist.objects.filter(medium=self)])
+            return '<a href="javascript:void(0)" data-content="%s">%s</a>' % (content, str(count))
+        return count
 
 class Unit(models.Model):
     name   = models.CharField(max_length=128)

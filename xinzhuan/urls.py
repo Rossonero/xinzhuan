@@ -5,11 +5,13 @@ from django.contrib import admin
 admin.autodiscover()
 
 urlpatterns = patterns('',
-	url(r'^api/', include('api.urls')),
     url(r'^$', 'xinzhuan.views.home'),
+	url(r'^api/', include('api.urls')),
+	url(r'^data-and-tools/', include('tools.urls')),
     # TODO: FIX IT
     # url(r'^provincial-media-data/', 'xinzhuan.views.statistic'),
     url(r'^provincial-media-data/(?P<province>.*?)/?$', 'xinzhuan.views.statistic', name='statistic'),
+    url(r'^a/', 'xinzhuan.views.analysis', name='analysis'),
 
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
