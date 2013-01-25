@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <title>{% block title %}{% endblock %} - {% trans "Xinzhuan" %}</title>
     <link href='http://fonts.googleapis.com/css?family=Fjalla+One' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Archivo+Black' rel='stylesheet' type='text/css'>
     {% if request.META.REMOTE_ADDR == '127.0.0.1' %}
     <link href="/static/css/bootstrap.min.css" rel="stylesheet">
     <link href="/static/css/timeline.css" rel="stylesheet">
@@ -25,7 +26,7 @@
                 <img src="/static/img/logo.png">
             </div>
             <ul class="menu">
-                <li><a href="#">Newpaper Analysis</a></li>
+                <li><a href="/newspaper/">Newpaper Analysis</a></li>
                 <li><a href="{% url statistic '' %}">Media Statictic</a></li>
                 <li><a href="/data-and-tools/">Data and Tools</a></li>
             </ul>
