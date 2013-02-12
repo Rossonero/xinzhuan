@@ -14,3 +14,16 @@ class Article(models.Model):
     url              = models.URLField(blank=True)
     author           = models.ForeignKey(Journalist, blank=True, null=True)
     author_name      = models.CharField(max_length=64, blank=True)
+
+WORD_CATEGORY_CHOICE = (
+    ('n', 'noun'),
+    ('v', 'verb'),
+    ('a', 'adjective'),
+    ('d', 'adverb'),
+)
+class Word(models.Model):
+    word             = models.CharField(max_length=16)
+    category         = models.CharField(max_length=8, choices=WORD_CATEGORY_CHOICE)
+    article          = models.ForeignKey(Article)
+    medium           = models.ForeignKey(Medium)
+    frequency        = models.IntegerField()

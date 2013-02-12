@@ -64,6 +64,14 @@ def analysis(request):
     sw = Medium.objects.get(pk=1081)
     pd = Medium.objects.get(pk=951)
     ctx = {
-
+        'title' : 'a'
     }
     return TemplateResponse(request, 'analysis.html', ctx)
+
+def newspapers(request):
+    sw = Medium.objects.get(pk=1081)
+    pd = Medium.objects.get(pk=951)
+    ctx = {
+        'title'
+    }
+    return TemplateResponse(request, 'newspapers.html', ctx)
