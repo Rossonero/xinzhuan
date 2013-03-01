@@ -2,8 +2,15 @@
 from django.template.response import TemplateResponse
 
 
-def ictclas(request):
-	ctx = {
-
-	}
-	return TemplateResponse(request, 'tools/ictclas.html', ctx)
+def handler(request, route):
+    if not route: route = 'ictclas'
+    ctx = {
+        'route' : route
+    }
+    title = {
+        'ictclas' : 'ICTCLAS',
+        'translation' : 'Chinese Translation',
+        'data' : 'Data'
+    }
+    ctx['title'] = title[route]
+    return TemplateResponse(request, 'tools/body.html', ctx)

@@ -2,4 +2,4 @@ django
 requests
 MySQL-python
 beautifulsoup4
-django-pure-pagination
+python-dateutil

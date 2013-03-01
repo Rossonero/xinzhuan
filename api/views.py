@@ -20,6 +20,8 @@ from tools.pyictclas import PyICTCLAS, CodeType, POSMap
 import requests
 import json
 import time
+import urllib
+import re
 
 @commit_on_success
 @csrf_exempt
@@ -62,6 +64,17 @@ class Apis():
         '''
         return HttpResponse(json.dumps({'code': 0, 'response': data }, default=self._date_handler))
 
+    def articles(self, request, interface):
+        INTERFACES = { i : i + '()' for i in ['detail', 'add', 'edit', 'resort', 'delete'] }
+
+        def detail():
+            article_id = int(request.REQUEST.get('article_id'))
+            article = Article.objects.get(pk=article_id)
+
+            return self._response(model_to_dict(article))
+        return eval(INTERFACES[interface])
+
+
     @commit_on_success
     @csrf_exempt
     def media(self, request, interface):
@@ -87,30 +100,42 @@ class Apis():
         return eval(INTERFACES[interface])
 
     def tools(self, request, interface):
-        INTERFACES = { i : i + '()' for i in ['ictclas', 'add', 'edit', 'resort', 'delete'] }
+        INTERFACES = { i : i + '()' for i in ['ictclas', 'translation', 'edit', 'resort', 'delete'] }
 
         def ictclas():
             ictclas = PyICTCLAS()
             ictclas.ictclas_init()
             ictclas.ictclas_setPOSmap(POSMap.ICT_POS_MAP_SECOND)
             content = request.POST.get('content')
-            word_frequency_limit = request.POST.get('frequency_limit', 3)
-            if not content: content = Article.objects.get(pk=555).content
-            result = ictclas.ictclas_paragraphProcess(content, CodeType.CODE_TYPE_UTF8).value.lstrip()
+            word_frequency_limit = int(request.POST.get('frequency_limit', 1))
             response = {
-                'content' : content,
-                'result' : result,
+                'result' : ictclas.ictclas_paragraphProcess(content, CodeType.CODE_TYPE_UTF8).value.lstrip()
             }
             word_array = []
             word_frequency = {}
-            allow_parts_of_speech = ['n', 'v', 'a', 'd']
-            for word in result.split(' '):
-                if len(word) > 0 and word[-1] in allow_parts_of_speech: word_array.append(word)
+            allow_parts_of_speech = ['n', 'v', 'a']
+            ignore_speech  = ['是/v', '有/v', '-/n']
+            for word in response['result'].split(' '):
+                if len(word) > 0 and word[-1] in allow_parts_of_speech and word not in ignore_speech: word_array.append(word)
             for word in set(word_array):
-                if word_array.count(word) > word_frequency_limit: word_frequency[word] = word_array.count(word)
+                if word_array.count(word) >= word_frequency_limit: word_frequency[word] = word_array.count(word)
 
             sorted_word_frequency = sorted(word_frequency.iteritems(), key=lambda (k, v) : (v,k))
             response['word_frequency'] = list(reversed(sorted_word_frequency))
             return self._response(response)
+
+        def translation():
+            # text = request.POST.get('text').encode('utf-8')
+            text = '中国报纸分析'.encode('utf-8')
+            show_pinyin = int(request.POST.get('show_pinyin', 1))
+            r = requests.get('http://translate.google.cn/translate_a/t?client=t&text='+urllib.quote(text)+'&hl=zh-CN&sl=zh-CN&tl=en&ie=UTF-8&oe=UTF-8&multires=1&prev=btn&ssel=0&tsel=0&sc=1')
+            post_translational_and_pinyin = re.search('\[\[\["(.*)]],,"zh-CN"', r.content).groups()[0].split('","')
+            response = {}
+            response['result'] = post_translational_and_pinyin[0]
+            if show_pinyin:
+                response['pinyin'] = post_translational_and_pinyin[-1][0:-1]
+            #re.search('^\[\[\["(.*)"]],,"zh-CN"', s); print r.groups()[0]
+            return self._response(response)
+
 
         return eval(INTERFACES[interface])

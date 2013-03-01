@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %} Chinese Newspaper Analysis {% endblock %}
+
+{% block content %}
+
+<table class="table">
+    {% for article in articles %}
+    <tr>
+        <td>{{article.title}}</td>
+        <td>{{article.content|slice:":100"}}</td>
+    </tr>    
+    {% endfor %}
+</table>
+{% endblock %}
+
+{% block scripts %}
+
+{% endblock %}

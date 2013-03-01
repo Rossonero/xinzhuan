@@ -6,6 +6,7 @@ from django.core.paginator import Paginator
 
 from media.models import Medium, Unit
 from misc.models import Area
+from articles.models import Article
 
 def home(request):
     ctx = {
@@ -60,11 +61,10 @@ def statistic(request, province):
     return TemplateResponse(request, 'statistic.html', ctx)
 
 
-def analysis(request):
-    sw = Medium.objects.get(pk=1081)
-    pd = Medium.objects.get(pk=951)
+def analysis(request, medium_id):
+    medium = get_object_or_404(Medium, pk=medium_id)
     ctx = {
-        'title' : 'a'
+        'title' : medium.english_name
     }
     return TemplateResponse(request, 'analysis.html', ctx)
 
@@ -75,3 +75,18 @@ def newspapers(request):
         'title'
     }
     return TemplateResponse(request, 'newspapers.html', ctx)
+
+
+def handler(request):
+    articles = Article.objects.all()
+    # 分页
+    paginator = Paginator(articles, 100)
+    try:
+        page = int(request.GET.get('page', 1))
+    except:
+        page = 1    
+    articles = paginator.page(page)
+    ctx = {
+        'articles' : articles
+    }
+    return TemplateResponse(request, 'handler.html', ctx)

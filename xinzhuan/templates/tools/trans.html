@@ -1,0 +1,60 @@
+{% extends "tools/base.html" %}
+
+{% block title %} Chinese Translation {% endblock %}
+
+{% block main %}
+<h2>Chinese Translation</h2>
+<p>The tool powered by Google translation engines for Chinese to English translation, send chinese text to api and get response, which includes post-translational text, synongms This translation tool includes online translator, translation dictionary, text-to-speech in a variety of languages, multilingual virtual keyboard, spell checker, Russian decoder, back translation, and email service.</p>
+<h3>URL</h3>
+<code>http://xinzhuan.info/api/tools/translation.json</code>
+<h3>Request parameters</h3>
+    <ul class="list">
+
+        <h4>Sample request</h4>
+        <div class="well sample">curl <span style="color:#D14">"http://xinzhuan.info/api/tools/translation.json"</span> --data <span style="color:#D14">"text=中国报纸分析"</span></div>
+    </ul>
+<h3>Response properties</h4>
+    <ul class="list">
+        <li><b>code</b> - </li>
+        <li><b>response</b> - 
+            <ul>
+                <li><b>result</b> - </li>
+                <li><b>show_pinyin</b> - </li>
+            </ul>
+        </li>
+        <h4>Sample response</h4>
+        <xmp class="well sample">{
+  "code": 0,
+  "response": 
+    {"result": "China newspaper analysis",
+     "pinyin": "Zhōngguó bàozhǐ fēnxī"
+    }
+}</xmp>
+    </ul>
+        
+<h3>Demo</h3>
+    <textarea name="" id="" rows="10" style="width:100%;">中国报纸分析</textarea>
+    <button class="btn btn-success">Submit</button>
+    <h4>Result</h4>
+        <blockquote class="result">
+            <p class="muted">The results of the query will be displayed here.</p>
+        </blockquote>
+{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript">
+$('.btn').click(function(e){
+    var text = $('textarea').val();
+    $.post('/api/tools/translation.json', {'text': text}, function(rsp){
+        $('.result p').removeClass('muted').text(rsp.response.result);
+        if (rsp.response.pinyin){
+            $('.result').after('<h4>Pinyin</h4><p>'+rsp.response.pinyin+'</p>');
+        };
+    }, 'json');
+});
+</script>
+
+<script type="text/javascript">
+
+</script>
+{% endblock %}

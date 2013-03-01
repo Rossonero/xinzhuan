@@ -6,12 +6,13 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
     url(r'^$', 'xinzhuan.views.newspapers'),
-	url(r'^api/', include('api.urls')),
-	url(r'^data-and-tools/', include('tools.urls')),
-    # TODO: FIX IT
-    # url(r'^provincial-media-data/', 'xinzhuan.views.statistic'),
+    url(r'^api/', include('api.urls')),
+    url(r'^data-and-tools/', include('tools.urls')),
     url(r'^provincial-media-data/(?P<province>.*?)/?$', 'xinzhuan.views.statistic', name='statistic'),
-    url(r'^newspapers/', 'xinzhuan.views.newspapers', name='newspapers'),
+    url(r'^newspapers/$', 'xinzhuan.views.newspapers', name='newspapers'),
+    url(r'^newspapers/(?P<medium_id>\d+)/$', 'xinzhuan.views.analysis'),
+    url(r'^analysis/', 'xinzhuan.views.analysis', name='analysis'),
+    url(r'^handler/', 'xinzhuan.views.handler'),
 
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),

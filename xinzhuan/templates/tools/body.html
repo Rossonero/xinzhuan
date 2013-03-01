@@ -1,0 +1,124 @@
+{% extends "tools/base.html" %}
+
+{% block title %} {{title}} {% endblock %}
+
+{% block main %}
+<h2>{{title}}</h2>
+
+{% if route == 'ictclas' %}
+<p><a href="http://www.ictclas.org/">ICTCLAS</a> (Institute of Computing Technology,Chinese Lexical Analysis System) is a system developed by Institute of Computing Technology, Chinese Academy of Sciences. This tool power by ICTCLAS, written in Python, can be use to divided Chinese word, tagged part of Chinese word, calculated word frequency.</p>
+{% endif %}
+
+{% if route == 'translation' %}
+<p>The tool powered by <a href="http://translate.google.com">Google translation</a> engines for Chinese to English translation, send chinese text to api and get response, which includes translated text and pinyin.</p>
+{% endif %}
+
+<h3>URL</h3>
+<code>http://xinzhuan.info/api/tools/{{route}}.json</code>
+<h3>Request parameters</h3>
+    <ul class="list">
+        {% if route == 'ictclas' %}
+        <li><b>content</b> - Content which you want handle. Anything but Chinese rarely makes sense anyway.</li>
+        <li><b>frequency_limit</b> - Only word frequecy is greater than or equal to than <i>frequency_limit</i> will be response. <b>Default: 3</b></li>
+        {% endif %}
+
+        {% if route == 'translation' %}
+        <li><b>text</b> - The text you want to translate.</li>
+        <li><b>show_pinyin</b> - Sets whether the Chinese pinyin included. Possible values are: <i>1, 0</i>. <b>Default: 0</b></li>
+        {% endif %}
+
+        <h4>Sample request</h4>
+        <div class="well sample">curl <span style="color:#D14">"http://xinzhuan.info/api/tools/{{route}}.json"</span> --data {% if route == 'ictclas' %}<span style="color:#D14">"content=中国报纸分析是对中国大陆出版的报纸进行内容分析&frequency_limit=1"</span>{% endif %}{% if route == 'translation' %}<span style="color:#D14">"text=中国报纸分析&show_pinyin=1"</span>{% endif %}</div>
+        
+    </ul>
+<h3>Response properties</h3>
+    <ul class="list">
+        <li><b>code</b> - The error code of Xinzhuan API alawys 0 except a request was valid and interpreted correctly.</li>
+        <li><b>response</b>
+            <ul>
+                {% if route == 'ictclas' %}
+                <li><b>result</b> - </li>
+                <li><b>word_frequency</b> - Calculated result of word frequency, calculates exactly include <b>\n \v \a</b>.</li>
+                {% endif %}
+
+                {% if route == 'translation' %}
+                <li><b>result</b> - Text are translated into English.</li>
+                <li><b>pinyin</b> - .</li>
+                {% endif %}
+            </ul>
+        </li>
+        <h4>Response properties</h4>
+{% if route == 'ictclas' %}
+                <xmp class="well sample">{
+  "code": 0,
+  "response": 
+    {
+     "result": "中国/n 报纸/n 分析/v 是/v 对/p 中国/n 大陆/n 出版/v 的/u
+      报纸/n 进行/v 内容/n 分析/v" ,
+     "word_frequency": [
+        ["报纸/n",2], ["分析/v",2], ["中国/n",2], ["进行/n",1],
+        ["大陆/n",1], ["出版/v",1], ["内容/n",1]
+     ]
+    }
+}</xmp>
+{% endif %}
+
+{% if route == 'translation' %}
+        <xmp class="well sample">{
+  "code": 0,
+  "response": 
+    {"result": "China newspaper analysis",
+     "pinyin": "Zhōngguó bàozhǐ fēnxī"
+    }
+}</xmp>
+{% endif %}
+    </ul>
+
+<h3>Demo</h3>
+    <textarea name="" id="" rows="10" style="width:100%;">{% if route == 'translation' %}中国报纸分析{% endif %}</textarea>
+    <button class="btn btn-success submit">Submit</button>&nbsp;{% if route == 'ictclas' %}<button class="btn load-article">Load random article</button> <button class="btn" onclick="$('textarea').val('')">Empty</button>{% endif %}
+    <h4>Result</h4>
+        <blockquote class="result">
+            <p class="muted">The results of the query will be displayed here.</p>
+        </blockquote>
+{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript">
+
+$('.load-article').click(function(e){
+    $.get('/api/articles/detail.json?article_id=' + Math.ceil(Math.random()*10000).toString(), function(rsp){
+        $('textarea').val(rsp.response.content);
+        $('.submit').click();
+    }, 'json');
+});
+
+$('.submit').click(function(e){
+    var content = $('textarea').val();
+    $.post('/api/tools/{{route}}.json', {'content': content}, function(rsp){
+        {% if route == 'ictclas' %}
+        var extraContent = $('<h4>Word Frequency</h4><p>'+rsp.response.word_frequency+'</p>').insertAfter('.result');
+        {% endif %}
+
+        {% if route == 'translation' %}
+        var extraContent = $('<h4>Pinyin</h4><p>'+rsp.response.pinyin+'</p>').insertAfter('.result');
+        {% endif %}
+
+        $('.result p').removeClass('muted').text(rsp.response.result);
+    }, 'json');
+});
+
+var navTop  = $('.affix').length && $('.affix').offset().top,
+    isFixed = 0;
+$(window).on('scroll', function(){
+    var scrollTop = $(window).scrollTop();
+    if (scrollTop >= navTop && !isFixed) {
+        isFixed = 1;
+        $('.affix').attr('style', 'top: 0px');
+    } else if (scrollTop <= navTop && isFixed) {
+        isFixed = 0;
+        $('.affix').attr('style', '')
+    };
+});
+</script>
+{% endblock %}

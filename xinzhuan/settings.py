@@ -136,7 +136,6 @@ INSTALLED_APPS = (
     'media',
     'misc',
 
-    'pure_pagination',
 )
 
 # A sample logging configuration. The only tangible logging

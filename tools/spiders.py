@@ -194,11 +194,10 @@ class Spiders():
     
     def cnki(self):
         domain = 'http://epub.cnki.net'
-        for page in range(41, 81):
-            # url = r'http://epub.cnki.net/kns/Navi/Newbrief.aspx?curpage='+ str(page) +'&pagename=ASP.navi_newitem_aspx&dbPrefix=25_Catalog&dbCatalog=%E4%B8%AD%E5%9B%BD%E9%87%8D%E8%A6%81%E6%8A%A5%E7%BA%B8%E5%85%A8%E6%96%87%E6%95%B0%E6%8D%AE%E5%BA%93&ConfigFile=25_Catalog.xml&NaviID=25&t=1357870014588&DisplayMode=listmode'
-
-            # url = r'http://acad.cnki.net/Kns55/Navi/Newbrief.aspx?pagename=ASP.navi_newitem_aspx&dbPrefix=25_Catalog&dbCatalog=%E4%B8%AD%E5%9B%BD%E9%87%8D%E8%A6%81%E6%8A%A5%E7%BA%B8%E5%85%A8%E6%96%87%E6%95%B0%E6%8D%AE%E5%BA%93&ConfigFile=25_Catalog.xml&NaviID=25&t=1357892388302'
-            url = 'http://epub.cnki.net/kns/Navi/Newbrief.aspx?curpage='+str(page)+'&RecordsPerPage=20&QueryID=14&ID=&turnpage=1&tpagemode=L&dbPrefix=25_CATALOG&Fields=Value%3dValue%3dValue%3dValue%3dValue=&DisplayMode=listmode&pagename=ASP.navi_newitem_aspx&NaviID=25&sKuaKuID=14'
+        # TODO: FIX page 27
+        for curpage in range(647, 677):
+            print curpage
+            url = 'http://epub.cnki.net/kns/Navi/Newbrief.aspx?curpage='+str(curpage)+'&RecordsPerPage=20&QueryID=16&ID=&turnpage=1&tpagemode=L&dbPrefix=25_CATALOG&Fields=Value=&DisplayMode=listmode&pagename=ASP.navi_newitem_aspx&NaviID=25&sKuaKuID=16'
             cookies = {
                 'SID_sug' : '111056',
                 'SID_kcms' : '202111',
@@ -222,8 +221,6 @@ class Spiders():
                 article               = self._get_rmrb_article(article_content)
                 # article.url           = article_link_response.url
 
-
-
                 link = article_content.find('li', {'class' : 'pdf'})
                 if not link:
                     link = article_content.find('li', {'class' : 'pdfD'})
@@ -231,7 +228,7 @@ class Spiders():
                 file_link = link.find('a').get('href')
                 file_r_link = file_link.replace('\n', '').replace(' ','')
                 file_download_link = urljoin(article_link_response.url, file_r_link)
-                print file_download_link
+
                 r = requests.get(file_download_link, cookies=cookies, stream=True)
                 with open('article.pdf', 'wb') as f:
                     for chunk in r.iter_content():
@@ -243,7 +240,7 @@ class Spiders():
                 except:
                     continue
                 article_content = f.read()
-                print article_content
+
                 f.close()
                 Popen(['rm', 'article.pdf'], stdout=PIPE)
                 article.content = article_content
@@ -305,8 +302,8 @@ class Spiders():
 
         article.issue = self._get_issue_from_date(publication_date, 'rmrb')
         article.page = page
-        article.publication_date = publication_date
-        article, created = Article.objects.get_or_create(medium=article.medium, title=article.title)
+        article.publication_date = datetime.datetime.strptime(publication_date, '%Y-%m-%d')
+        article, created = Article.objects.get_or_create(medium=article.medium, title=article.title, issue=article.issue, publication_date=article.publication_date)
         print article.title
         return article
 

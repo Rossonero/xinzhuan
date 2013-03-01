@@ -25,6 +25,7 @@ MEDIUM_CATEGORY = (
 
 class Medium(models.Model):
     name           = models.CharField(max_length=128)
+    english_name  = models.CharField(max_length=128)
     address        = models.TextField(blank=True)
     category       = models.CharField(max_length=64, choices=MEDIUM_CATEGORY)
     cn             = models.CharField(max_length=64, blank=True, null=True)
