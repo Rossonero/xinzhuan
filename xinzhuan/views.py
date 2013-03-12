@@ -8,6 +8,9 @@ from media.models import Medium, Unit
 from misc.models import Area
 from articles.models import Article
 
+from dateutil.relativedelta import relativedelta
+import datetime
+
 def home(request):
     ctx = {
         'lang' : _('Chinese')
@@ -63,6 +66,7 @@ def statistic(request, province):
 
 def analysis(request, medium_id):
     medium = get_object_or_404(Medium, pk=medium_id)
+
     ctx = {
         'title' : medium.english_name
     }

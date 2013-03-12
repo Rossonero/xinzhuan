@@ -42,3 +42,8 @@ class Word(models.Model):
 class ErrorWord(models.Model):
     wrong_word             = models.CharField(max_length=16)
     right_word             = models.CharField(max_length=16)
+
+# class Photo(models.Model):
+#     article          = models.ForeignKey(Article)
+#     summary          = models.TextField(blank=True)
+#     image            = models.ImageField()

@@ -1,4 +1,5 @@
 # -*- coding:utf-8 -*-
+from django.db.models import Count, Sum
 from django.core import serializers
 from django.core.paginator import Paginator
 from django.contrib.auth.models import User
@@ -12,7 +13,7 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 from bs4 import BeautifulSoup
 
-from articles.models import Article
+from articles.models import Article, Word
 from media.models import Medium
 from journalists.models import Journalist
 from tools.pyictclas import PyICTCLAS, CodeType, POSMap
@@ -22,6 +23,8 @@ import json
 import time
 import urllib
 import re
+import datetime
+from dateutil.relativedelta import relativedelta
 
 @commit_on_success
 @csrf_exempt
@@ -65,7 +68,47 @@ class Apis():
         return HttpResponse(json.dumps({'code': 0, 'response': data }, default=self._date_handler))
 
     def articles(self, request, interface):
-        INTERFACES = { i : i + '()' for i in ['detail', 'add', 'edit', 'resort', 'delete'] }
+        INTERFACES = { i : i + '()' for i in ['detail', 'monthly_keywords', 'edit', 'resort', 'word'] }
+
+        def monthly_keywords():
+            data = {}
+            data['timeline'] = {"type":"default","startDate":"2012",}
+            data['timeline']['date'] = []
+
+            originated_date = datetime.datetime.strptime('2012-01-01', '%Y-%m-%d')
+            medium_id = 951#int(request.GET.get('medium_id'))
+            for i in range(12):
+                start_date  = originated_date + relativedelta(months=+i)
+                end_date    = originated_date + relativedelta(months=+i+1)
+                article_id_list    = Article.objects.filter(medium_id=medium_id).filter(publication_date__gt=start_date).filter(publication_date__lt=end_date).values_list('id', flat=True)
+                words       = Word.objects.filter(article_id__in=article_id_list).values('word', 'frequency').order_by('-frequency')
+
+                _d = {}
+                for word in words:
+                    if word['word'] in _d:
+                        _d[word['word']] += word['frequency']
+                    else:
+                        _d[word['word']] = word['frequency']
+                _d = sorted(_d.iteritems(), key=lambda (k, v): (v,k))
+
+                monthly_chart_data = unicode([list(e) for e in _d[::-1][:15]]).replace('L', '').replace('[u', '[')
+                data['timeline']['date'].append({
+                    'startDate' : start_date.strftime('%Y,%m'),
+                    'headline' : 'Frequent word on %s' % start_date.strftime('%B'),
+                    'text': '<div id="id_chart_'+str(i)+'" style="width:700px; height:260px;"></div>' + 
+                            '<script>$.jqplot("id_chart_'+str(i)+'", ['+monthly_chart_data+'], {seriesDefaults:{renderer:$.jqplot.BarRenderer,rendererOptions: {varyBarColor: true}},axes:{xaxis:{renderer: $.jqplot.CategoryAxisRenderer}}}); XINZHUAN.words['+str(i+1)+'] = '+monthly_chart_data+';</script>'
+                })
+                # break
+
+
+            return HttpResponse(json.dumps(data))
+
+
+        def word():
+            word = request.REQUEST.get('word')
+            print word
+
+            return self._response(word)
 
         def detail():
             article_id = int(request.REQUEST.get('article_id'))

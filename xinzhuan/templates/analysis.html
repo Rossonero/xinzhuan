@@ -4,46 +4,78 @@
 
 {% block content %}
 <div class="row">
-    <div class="span6">
+    <div class="span8">
         <h3><i>People's Daily</i></h3>
-        <p>Daily newspaper in the People's Republic of China. The paper is an organ of the Central Committee of the Communist Party of China, published worldwide with a circulation of 3 to 4 million. Similar to Pravda's relationship with the Soviet Union, the newspaper provides direct information on the policies and viewpoints of the Party. Be viewed as</p>
-        <h4>Sample Numbers</h4>
-        <table>
-            <tr><td>Articles</td><td>1</td></tr>
-            <tr><td>Comments</td><td>1</td></tr>
-        </table>
+            <h4>Summary</h4>
+            <p>Daily newspaper in the People's Republic of China. The paper is an organ of the Central Committee of the Communist Party of China, published worldwide with a circulation of 3 to 4 million. Similar to Pravda's relationship with the Soviet Union, the newspaper provides direct information on the policies and viewpoints of the Party. Be viewed as</p>
+            <h4>Sample Numbers</h4>
+            <table>
+                <tr><td>Articles</td><td>1</td></tr>
+                <tr><td>Comments</td><td>1</td></tr>
+            </table>
     </div>
-    <div class="span6">
-        <h3><i>Southern Weekly</i></h3>
-        <p>Weekly newspaper based in Guangzhou, People's Republic of China. It is considered the most outspoken newspaper, strongly recommended by liberal intellectuals and is said to contribute to public democratic debate and the formation of civil society.</p>
+    <div class="span4">
+        <img class="thumbnail" width="200" src="http://img.xinzhuan.info/scans/1081/2012071701.jpg"/>
     </div>
 </div>
 <div class="row">
-    <h2>InfoGrap</h2>
-    <div id="timeline-embed"></div>
+    <div class="span12">
+        <h3>Important term's Timeline</h3>
+        <p class="text-info">* Article recommended by liberal intellectuals and is said to contribute to public democratic debate and the formation of civil society</p>
+        <div id="timeline-embed"></div>
+    </div>
 </div>
 
 {% endblock %}
 
 {% block scripts %}
-    <div id="timeline-embed"></div>
     <script type="text/javascript">
         var timeline_config = {
             width:              '100%',
             height:             '600',
-            source:             '/static/js/data.json',
+            source:             '/api/articles/monthly_keywords.json',
             embed_id:           'timeline-embed',               //OPTIONAL USE A DIFFERENT DIV ID FOR EMBED
             start_at_end:       false,                          //OPTIONAL START AT LATEST DATE
             start_at_slide:     '4',                            //OPTIONAL START AT SPECIFIC SLIDE
-            start_zoom_adjust:  '3',                            //OPTIONAL TWEAK THE DEFAULT ZOOM LEVEL
+            start_zoom_adjust:  '2',                            //OPTIONAL TWEAK THE DEFAULT ZOOM LEVEL
             hash_bookmark:      true,                           //OPTIONAL LOCATION BAR HASHES
             font:               'Bevan-PotanoSans',             //OPTIONAL FONT
             debug:              true,                           //OPTIONAL DEBUG TO CONSOLE
-            lang:               'fr',                           //OPTIONAL LANGUAGE
+            lang:               'en',                           //OPTIONAL LANGUAGE
             maptype:            'watercolor',                   //OPTIONAL MAP STYLE
             css:                'path_to_css/timeline.css',     //OPTIONAL PATH TO CSS
             // js:                 'path_to_js/timeline-min.js'    //OPTIONAL PATH TO JS
         }
     </script>
 <script type="text/javascript" src="/static/js/storyjs-embed.js"></script>
+<script type="text/javascript" src="/static/js/jquery.jqplot.min.js"></script>
+<script type="text/javascript" src="/static/js/plugins/jqplot.barRenderer.min.js"></script>
+<script type="text/javascript" src="/static/js/plugins/jqplot.categoryAxisRenderer.min.js"></script>
+<script type="text/javascript">
+window.XINZHUAN = {};
+XINZHUAN.words = {};
+for (var i = 1; i <= 12; i++) {
+    XINZHUAN.words[i] = [];
+};
+
+function renderWordData(month, pointIndex){
+    var word = XINZHUAN.words[month][pointIndex][0];
+
+    var wordChart = $('<div>');
+    $.post('/api/articles/word.json', {"word": word}, function(rsp){
+        var json = rsp.response;
+        console.log(json)
+    },'json');
+}
+
+$(document).on('mouseenter', 'div[id^="id_chart_"]', function(){
+    $(this).off('jqplotDataClick');
+    $(this).on('jqplotDataClick', 
+        function (ev, seriesIndex, pointIndex, data) {
+            var month = ev.currentTarget.id.replace('id_chart_','')
+            renderWordData(month/1+1, pointIndex);
+        }
+    ); 
+});
+</script>
 {% endblock %}
