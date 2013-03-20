@@ -95,7 +95,7 @@ class Apis():
                 data['timeline']['date'].append({
                     'startDate' : start_date.strftime('%Y,%m'),
                     'headline' : 'Frequent word on %s' % start_date.strftime('%B'),
-                    'text': '<div id="id_chart_'+str(i)+'" style="width:700px; height:260px;"></div>' + 
+                    'text': '<div id="id_chart_'+str(i)+'" style="width:700px; height:260px;margin-right:30px;"></div>' + 
                             '<script>$.jqplot("id_chart_'+str(i)+'", ['+monthly_chart_data+'], {seriesDefaults:{renderer:$.jqplot.BarRenderer,rendererOptions: {varyBarColor: true}},axes:{xaxis:{renderer: $.jqplot.CategoryAxisRenderer}}}); XINZHUAN.words['+str(i+1)+'] = '+monthly_chart_data+';</script>'
                 })
                 # break
@@ -106,9 +106,21 @@ class Apis():
 
         def word():
             word = request.REQUEST.get('word')
-            print word
+            originated_date = datetime.datetime.strptime('2012-01-01', '%Y-%m-%d')
+            medium_id = 951#int(request.GET.get('medium_id'))
+            word_frequency_sum_list = []
+            month_list = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+            for i in range(12):
 
-            return self._response(word)
+                start_date  = originated_date + relativedelta(months=+i)
+                end_date    = originated_date + relativedelta(months=+i+1)
+
+                word_frequency_sum = Word.objects.filter(word=word).aggregate(sum=Sum('frequency'))['sum'] or 0
+  
+
+                word_frequency_sum_list.append(['%s 1' % month_list[i], word_frequency_sum])
+                
+            return self._response(word_frequency_sum_list)
 
         def detail():
             article_id = int(request.REQUEST.get('article_id'))
@@ -143,7 +155,7 @@ class Apis():
         return eval(INTERFACES[interface])
 
     def tools(self, request, interface):
-        INTERFACES = { i : i + '()' for i in ['ictclas', 'translation', 'edit', 'resort', 'delete'] }
+        INTERFACES = { i : i + '()' for i in ['ictclas', 'translation', 'check', 'resort', 'delete'] }
 
         def ictclas():
             ictclas = PyICTCLAS()
@@ -168,10 +180,9 @@ class Apis():
             return self._response(response)
 
         def translation():
-            # text = request.POST.get('text').encode('utf-8')
-            text = '中国报纸分析'.encode('utf-8')
+            content = request.POST.get('content').encode('utf-8')
             show_pinyin = int(request.POST.get('show_pinyin', 1))
-            r = requests.get('http://translate.google.cn/translate_a/t?client=t&text='+urllib.quote(text)+'&hl=zh-CN&sl=zh-CN&tl=en&ie=UTF-8&oe=UTF-8&multires=1&prev=btn&ssel=0&tsel=0&sc=1')
+            r = requests.get('http://translate.google.cn/translate_a/t?client=t&text='+urllib.quote(content)+'&hl=zh-CN&sl=zh-CN&tl=en&ie=UTF-8&oe=UTF-8&multires=1&prev=btn&ssel=0&tsel=0&sc=1')
             post_translational_and_pinyin = re.search('\[\[\["(.*)]],,"zh-CN"', r.content).groups()[0].split('","')
             response = {}
             response['result'] = post_translational_and_pinyin[0]
@@ -180,5 +191,26 @@ class Apis():
             #re.search('^\[\[\["(.*)"]],,"zh-CN"', s); print r.groups()[0]
             return self._response(response)
 
+        def check():
+            content = request.POST.get('content').encode('utf-8')
+            r = requests.post('http://127.0.0.1:8000/api/tools/ictclas.json', {'content': content, 'frequency_limit' : 1})
+            word_list = r.json()['response']['result'].split(' ')
+            dubious_word_index_list = []
+            for i in range(len(word_list)):
+                ######检查助词######
+                word = word_list[i]
+                if len(word) > 0 and word[-1] == 'u' and word[:-2] in ['的', '地']:
+                    if word[:-2] == '的' and word_list[(i+1)][-1] != 'n' \
+                        or word[:-2] == '地' and word_list[(i+1)][-1] not in ['v',]:
+                        word_list[i] = '{' + word_list[i][:-2] + '}'
+                    else:
+                        word_list[i] = word_list[i][:-2]
+                else:
+                    word_list[i] = word_list[i][:-2]
+            response = {
+                'result' : '.'.join(word_list),
+                'error' : len(dubious_word_index_list),
+            }
+            return self._response(response)
 
         return eval(INTERFACES[interface])

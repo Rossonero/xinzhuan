@@ -37,6 +37,7 @@ class Word(models.Model):
     category         = models.CharField(max_length=8, choices=WORD_CATEGORY_CHOICE)
     article          = models.ForeignKey(Article)
     medium           = models.ForeignKey(Medium)
+    publication_date = models.DateField()
     frequency        = models.IntegerField()
 
 class ErrorWord(models.Model):

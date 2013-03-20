@@ -1,17 +1,27 @@
 {% extends "tools/base.html" %}
+{% load i18n %}
 
 {% block title %} {{title}} {% endblock %}
 
 {% block main %}
 <h2>{{title}}</h2>
+<p class="summary">
+    {% if route == 'ictclas' %}
+    <a href="http://www.ictclas.org/">ICTCLAS</a> (Institute of Computing Technology,Chinese Lexical Analysis System){% trans " is a system developed by Institute of Computing Technology, Chinese Academy of Sciences. This tool power by ICTCLAS, written in Python, can be use to divided Chinese word, tagged part of Chinese word, calculated word frequency. "%}
+    {% endif %}
 
-{% if route == 'ictclas' %}
-<p><a href="http://www.ictclas.org/">ICTCLAS</a> (Institute of Computing Technology,Chinese Lexical Analysis System) is a system developed by Institute of Computing Technology, Chinese Academy of Sciences. This tool power by ICTCLAS, written in Python, can be use to divided Chinese word, tagged part of Chinese word, calculated word frequency.</p>
-{% endif %}
+    {% if route == 'translation' %}
+    The tool powered by <a href="http://translate.google.com">Google translation</a> engines for Chinese to English translation, send chinese text to api and get response, which includes translated text and pinyin.
+    {% endif %}
 
-{% if route == 'translation' %}
-<p>The tool powered by <a href="http://translate.google.com">Google translation</a> engines for Chinese to English translation, send chinese text to api and get response, which includes translated text and pinyin.</p>
-{% endif %}
+    {% if route == 'check' %}
+    Input news article, this tool will be check for mistakes according to a wrong words database. It assumed Chinese auxiliary (的、地、得) correct usage from the part of speech.
+    {% endif %}
+
+    {% if route == 'categorizer' %}
+    The tool powered by <a href="http://translate.google.com">Google translation</a> engines for Chinese to English translation, send chinese text to api and get response, which includes translated text and pinyin.
+    {% endif %}
+</p>
 
 <h3>URL</h3>
 <code>http://xinzhuan.info/api/tools/{{route}}.json</code>
@@ -23,17 +33,28 @@
         {% endif %}
 
         {% if route == 'translation' %}
-        <li><b>text</b> - The text you want to translate.</li>
+        <li><b>content</b> - The content you want to translate.</li>
         <li><b>show_pinyin</b> - Sets whether the Chinese pinyin included. Possible values are: <i>1, 0</i>. <b>Default: 0</b></li>
         {% endif %}
 
+        {% if route == 'check' %}
+        <li><b>content</b> - The text you want to translate.</li>
+        {% endif %}
+
+        {% if route == 'categorizer' %}
+        {% endif %}
+
         <h4>Sample request</h4>
-        <div class="well sample">curl <span style="color:#D14">"http://xinzhuan.info/api/tools/{{route}}.json"</span> --data {% if route == 'ictclas' %}<span style="color:#D14">"content=中国报纸分析是对中国大陆出版的报纸进行内容分析&frequency_limit=1"</span>{% endif %}{% if route == 'translation' %}<span style="color:#D14">"text=中国报纸分析&show_pinyin=1"</span>{% endif %}</div>
+        <div class="well sample">curl <span style="color:#D14">"http://xinzhuan.info/api/tools/{{route}}.json"</span> --data 
+            <span style="color:#D14">{% if route == 'ictclas' %}"content=中国报纸分析是对中国大陆出版的报纸进行内容分析&frequency_limit=1"</span>{% endif %}
+            {% if route == 'translation' %}"content=中国报纸分析&show_pinyin=1"</span>{% endif %}
+            {% if route == 'check' %}"content=分析中国的报纸需要认真地收集详细地资料并系统的处理才能得到里想的结果"<{% endif %}/span>
+        </div>
         
     </ul>
 <h3>Response properties</h3>
     <ul class="list">
-        <li><b>code</b> - The error code of Xinzhuan API alawys 0 except a request was valid and interpreted correctly.</li>
+        <li><b>code</b> - The error code of Xinzhuan API alawys 0 except a request was valid.</li>
         <li><b>response</b>
             <ul>
                 {% if route == 'ictclas' %}
@@ -49,7 +70,7 @@
         </li>
         <h4>Response properties</h4>
 {% if route == 'ictclas' %}
-                <xmp class="well sample">{
+<xmp class="well sample">{
   "code": 0,
   "response": 
     {
@@ -64,7 +85,7 @@
 {% endif %}
 
 {% if route == 'translation' %}
-        <xmp class="well sample">{
+<xmp class="well sample">{
   "code": 0,
   "response": 
     {"result": "China newspaper analysis",
@@ -72,10 +93,18 @@
     }
 }</xmp>
 {% endif %}
+
+{% if route == 'check' %}
+<xmp class="well sample">{
+  "code": 0,
+  "response": 
+    {"result": "分析.中国.的.报纸.需要.认真.地.收集.详细.{地}.资料.并.系统.{的}.处理.才.能.得到.里.想.的.结果."}
+}</xmp>
+{% endif %}
     </ul>
 
 <h3>Demo</h3>
-    <textarea name="" id="" rows="10" style="width:100%;">{% if route == 'translation' %}中国报纸分析{% endif %}</textarea>
+    <textarea name="" id="" rows="10" style="width:100%;">{% if route == 'translation' %}中国报纸分析{% endif %} {% if route == 'check' %}分析中国的报纸需要认真地收集详细地资料并系统的处理才能得到里想的结果{% endif %}</textarea>
     <button class="btn btn-success submit">Submit</button>&nbsp;{% if route == 'ictclas' %}<button class="btn load-article">Load random article</button> <button class="btn" onclick="$('textarea').val('')">Empty</button>{% endif %}
     <h4>Result</h4>
         <blockquote class="result">

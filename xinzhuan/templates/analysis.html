@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 
-{% block title %} {{title}} - Chinese Newspaper Analysis {% endblock %}
+{% block title %} {{medium.english_name}} - Chinese Newspaper Analysis {% endblock %}
 
 {% block content %}
 <div class="row">
     <div class="span8">
-        <h3><i>People's Daily</i></h3>
+        <h3><i>{{medium.english_name}}</i></h3>
             <h4>Summary</h4>
             <p>Daily newspaper in the People's Republic of China. The paper is an organ of the Central Committee of the Communist Party of China, published worldwide with a circulation of 3 to 4 million. Similar to Pravda's relationship with the Soviet Union, the newspaper provides direct information on the policies and viewpoints of the Party. Be viewed as</p>
             <h4>Sample Numbers</h4>
@@ -20,8 +20,7 @@
 </div>
 <div class="row">
     <div class="span12">
-        <h3>Important term's Timeline</h3>
-        <p class="text-info">* Article recommended by liberal intellectuals and is said to contribute to public democratic debate and the formation of civil society</p>
+        <h3>Frequent word's Timeline</h3>
         <div id="timeline-embed"></div>
     </div>
 </div>
@@ -40,7 +39,7 @@
             start_zoom_adjust:  '2',                            //OPTIONAL TWEAK THE DEFAULT ZOOM LEVEL
             hash_bookmark:      true,                           //OPTIONAL LOCATION BAR HASHES
             font:               'Bevan-PotanoSans',             //OPTIONAL FONT
-            debug:              true,                           //OPTIONAL DEBUG TO CONSOLE
+            debug:              false,                           //OPTIONAL DEBUG TO CONSOLE
             lang:               'en',                           //OPTIONAL LANGUAGE
             maptype:            'watercolor',                   //OPTIONAL MAP STYLE
             css:                'path_to_css/timeline.css',     //OPTIONAL PATH TO CSS
@@ -49,6 +48,9 @@
     </script>
 <script type="text/javascript" src="/static/js/storyjs-embed.js"></script>
 <script type="text/javascript" src="/static/js/jquery.jqplot.min.js"></script>
+<script type="text/javascript" src="/static/js/plugins/jqplot.highlighter.min.js"></script>
+<script type="text/javascript" src="/static/js/plugins/jqplot.cursor.min.js"></script>
+<script type="text/javascript" src="/static/js/plugins/jqplot.dateAxisRenderer.min.js"></script>
 <script type="text/javascript" src="/static/js/plugins/jqplot.barRenderer.min.js"></script>
 <script type="text/javascript" src="/static/js/plugins/jqplot.categoryAxisRenderer.min.js"></script>
 <script type="text/javascript">
@@ -59,14 +61,40 @@ for (var i = 1; i <= 12; i++) {
 };
 
 function renderWordData(month, pointIndex){
+    if ( $('#id_word_chart').length > 0 ){
+        $('#id_word_chart').prev().remove();
+        $('#id_word_chart').prev().remove();
+        $('#id_word_chart').remove();
+    }
     var word = XINZHUAN.words[month][pointIndex][0];
-
-    var wordChart = $('<div>');
+    var wordChart = $('<h3>Word frequency ( Monthly )</h3><p class="text-info">China ( Chinese: 人 ) was frequency inrer , click point will be display.</p><div id="id_word_chart"></div>');
+    $('.span12').append(wordChart);
     $.post('/api/articles/word.json', {"word": word}, function(rsp){
         var json = rsp.response;
-        console.log(json)
+
+        $.jqplot('id_word_chart', [json], {
+            axes:{
+                xaxis:{
+                    renderer:$.jqplot.DateAxisRenderer,
+                    tickOptions:{
+                        formatString:'%b'
+                    }
+                },
+                yaxis:{
+                    min: 0,
+                    pad: 1.2
+                }
+            },
+            highlighter: {
+                show: true,
+                sizeAdjust: 7.5
+            },
+            cursor: {
+                show: false
+            }
+        });
     },'json');
-}
+};
 
 $(document).on('mouseenter', 'div[id^="id_chart_"]', function(){
     $(this).off('jqplotDataClick');

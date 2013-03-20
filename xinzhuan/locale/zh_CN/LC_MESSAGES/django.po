@@ -1,7 +1,15 @@
-#: views.py:11 templates/home.html:10
+#: views.py:16 templates/home.html:10
 msgid "Chinese"
-msgstr ""
+msgstr "中文"
 
-#: templates/base.html:7
+#: templates/base.html:6
 msgid "Xinzhuan"
 msgstr ""
+
+#: templates/tools/body.html:10
+msgid ""
+" is a system developed by Institute of Computing Technology, Chinese Academy "
+"of Sciences. This tool power by ICTCLAS, written in Python, can be use to "
+"divided Chinese word, tagged part of Chinese word, calculated word "
+"frequency. "
+msgstr "是一套由中科院计算技术研究所开发的系统。本工具依托于ICTCLAS，用Python编写，实现分词、词性标注、计算词频的功能。"

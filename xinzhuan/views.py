@@ -68,7 +68,8 @@ def analysis(request, medium_id):
     medium = get_object_or_404(Medium, pk=medium_id)
 
     ctx = {
-        'title' : medium.english_name
+        'medium' : medium,
+        'title' : medium.english_name,
     }
     return TemplateResponse(request, 'analysis.html', ctx)
 
