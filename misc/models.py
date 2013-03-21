@@ -6,3 +6,4 @@ class Area(models.Model):
     en        = models.CharField(max_length=128)
     area_id   = models.CharField(max_length=32)
     parent_id = models.CharField(max_length=32)
+    summary   = models.TextField(blank=True)
