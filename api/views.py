@@ -3,6 +3,7 @@ from django.db.models import Count, Sum
 from django.core import serializers
 from django.core.paginator import Paginator
 from django.contrib.auth.models import User
+from django.contrib.sites.models import get_current_site
 from django.db.transaction import commit_on_success
 from django.forms.models import model_to_dict
 from django.views.decorators.csrf import csrf_exempt
@@ -192,8 +193,9 @@ class Apis():
             return self._response(response)
 
         def check():
+            domain = get_current_site(request).domain
             content = request.POST.get('content').encode('utf-8')
-            r = requests.post('http://127.0.0.1:8000/api/tools/ictclas.json', {'content': content, 'frequency_limit' : 1})
+            r = requests.post('http://%s/api/tools/ictclas.json' % domain, {'content': content, 'frequency_limit' : 1})
             word_list = r.json()['response']['result'].split(' ')
             dubious_word_index_list = []
             for i in range(len(word_list)):

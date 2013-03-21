@@ -38,7 +38,7 @@
         {% endif %}
 
         {% if route == 'check' %}
-        <li><b>content</b> - The text you want to translate.</li>
+        <li><b>content</b> - The news article you want check. The more word this article contain, the more time will be cost.</li>
         {% endif %}
 
         {% if route == 'categorizer' %}
@@ -64,7 +64,11 @@
 
                 {% if route == 'translation' %}
                 <li><b>result</b> - Text are translated into English.</li>
-                <li><b>pinyin</b> - .</li>
+                <li><b>pinyin</b> - Include hanyu pinyin for the whole text.</li>
+                {% endif %}
+
+                {% if route == 'check' %}
+                <li><b>result</b> - If find possibly error, the auxiliary will have braces surrounding it.</li>
                 {% endif %}
             </ul>
         </li>
@@ -125,14 +129,19 @@ $('.load-article').click(function(e){
 $('.submit').click(function(e){
     var content = $('textarea').val();
     $.post('/api/tools/{{route}}.json', {'content': content}, function(rsp){
+    
+        var extraContent = $('<div class="extra"><h4></h4><p></p></div>');
         {% if route == 'ictclas' %}
-        var extraContent = $('<h4>Word Frequency</h4><p>'+rsp.response.word_frequency+'</p>').insertAfter('.result');
+        extraContent.find('h4').text('Word Frequency');
+        extraContent.find('p').text(rsp.response.word_frequency);
         {% endif %}
 
         {% if route == 'translation' %}
-        var extraContent = $('<h4>Pinyin</h4><p>'+rsp.response.pinyin+'</p>').insertAfter('.result');
+        extraContent.find('h4').text('Pinyin');
+        extraContent.find('p').text(rsp.response.pinyin);
         {% endif %}
 
+        $('.extra').length == 0 ? extraContent.insertAfter('.result') : '';
         $('.result p').removeClass('muted').text(rsp.response.result);
     }, 'json');
 });
