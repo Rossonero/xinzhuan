@@ -18,18 +18,23 @@ def home(request):
     return TemplateResponse(request, 'home.html', ctx)
 
 def statistic(request, province):
+    category = request.GET.get('category')
     if not province:
-        media = Medium.objects.all().order_by('name')
+        media = category and Medium.objects.filter(category=category).order_by('name') or Medium.objects.all().order_by('name')
         region = Area.objects.get(pk=3356)
+
+        media_count = Medium.objects.all().values('id')
     else:
         province = province.capitalize()
         region = get_object_or_404(Area, en=province)
-        media = Medium.objects.filter(region=region).order_by('name')
+        media = category and Medium.objects.filter(region=region).filter(category=category).order_by('name') or Medium.objects.filter(region=region).order_by('name')
+
+        media_count = Medium.objects.filter(region=region).values('id')
 
     counters = {
-        'newspaper' : media.filter(category='newspaper').count(),
-        'radio_and_tv' : media.filter(category='radio_and_tv').count(),
-        'periodical' : media.filter(category='periodical').count()
+        'newspaper' : media_count.filter(category='newspaper').count(),
+        'radio_and_tv' : media_count.filter(category='radio_and_tv').count(),
+        'periodical' : media_count.filter(category='periodical').count()
     }
 
     # 分页

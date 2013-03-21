@@ -22,9 +22,9 @@
         <div class="row">
             <div class="span5">
                 <ul class="numbers">
-                    <li><span class="label-category-radio_and_tv">Radio and TV</span><b>{{counters.radio_and_tv}}</b></li>
-                    <li><span class="label-category-newspaper">Nespapaer</span><b>{{counters.newspaper}}</b></li>
-                    <li><span class="label-category-periodical">Periodical</span><b>{{counters.periodical}}</b></li>
+                    <li class="{% if request.GET.category == 'radio_and_tv' %}active{% endif %}" data-category="radio_and_tv"><span class="label-category-radio_and_tv">Radio and TV</span><b>{{counters.radio_and_tv}}</b></li>
+                    <li class="{% if request.GET.category == 'newspaper' %}active{% endif %}" data-category="newspaper"><span class="label-category-newspaper">Nespapaer</span><b>{{counters.newspaper}}</b></li>
+                    <li class="{% if request.GET.category == 'periodical' %}active{% endif %}" data-category="periodical"><span class="label-category-periodical">Periodical</span><b>{{counters.periodical}}</b></li>
                 </ul>
             </div>
             <div class="span7">
@@ -75,7 +75,7 @@
         <div class="pagination">
             <ul>
                 {% if media.has_previous %}
-                <li><a href="?page={{ media.previous_page_number }}{%if request.GET.tag%}&tag={{request.GET.tag}}{%endif%}">«</a></li>
+                <li><a href="?page={{ media.previous_page_number }}{%if request.GET.category%}&category={{request.GET.category}}{%endif%}">«</a></li>
                 {% endif %} 
                 {% if start_page %}
                 <li id="page1"><a href="?page=1">1</a></li>
@@ -83,14 +83,14 @@
                 <li><a href="javascript:void(0)">...</a></li>
                 {% endif %}
                 {% for i in page_range %}
-                <li id="page{{i}}" {{request.GET.page }}><a  href="?page={{i}}{%if request.GET.tag%}&tag={{request.GET.tag}}{%endif%}">{{i}}</a> </li>
+                <li id="page{{i}}" {{request.GET.page }}><a  href="?page={{i}}{%if request.GET.category%}&category={{request.GET.category}}{%endif%}">{{i}}</a> </li>
                 {% endfor %}
                 {% if end_page %}
                 <li><a href="javascript:void(0)">...</a></li>
                 <li id="page1"><a href="?page={{paginator.num_pages}}">{{paginator.num_pages}}</a></li>
                 {% endif %}
                 {% if media.has_next %}
-                <li><a href="?page={{ media.next_page_number }}{%if request.GET.tag%}&tag={{request.GET.tag}}{%endif%}">»</a></li>
+                <li><a href="?page={{ media.next_page_number }}{%if request.GET.category%}&category={{request.GET.category}}{%endif%}">»</a></li>
                 {% endif %}
             </ul>
         </div>
@@ -109,5 +109,9 @@ $('table tr:not(.medium-detail)').click(function(e){
     $(this).next().fadeToggle();
 });
 
+$('.numbers li').click(function(e){
+    var category = $(this).data('category');
+    location.href = '?category=' + category;
+});
 </script>
 {% endblock %}
