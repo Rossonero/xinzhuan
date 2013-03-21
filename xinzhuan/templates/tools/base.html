@@ -5,20 +5,19 @@
 {% block content %}
 <div class="row">
     <div class="span3 tools-sidebar">
-    	<ul data-spy="affix">
-    		<li><a href="/tools/ictclas/">ICTCLAS</a></li>
-    		<li><a href="/tools/translation/">Chinese Translation</a></li>
+        <ul data-spy="affix">
+            <li><a href="/tools/ictclas/">ICTCLAS</a></li>
+            <li><a href="/tools/translation/">Chinese Translation</a></li>
             <li><a href="/tools/check/">Error Check</a></li>
-            <li><a href="/tools/categorizer/">News Categorizer</a></li>
-    		<li>
+            <li>
                 Donate Bitcoin to me
                 <img src="/static/img/qr.jpg" />
-                <p class="muted" style="font-size: 8px; font-family: arial;">1NArGM1rpWPUqEidXBnd9qnFNoxpDCmnmU</p>
+                <input value="1NArGM1rpWPUqEidXBnd9qnFNoxpDCmnmU" class="input-medium" onclick="this.select();" />
             </li>
-    	</ul>
+        </ul>
     </div>
     <div class="span9 tools-main">
-    	{% block main %}{% endblock %}
+        {% block main %}{% endblock %}
     </div>
 </div>
 {% endblock %}

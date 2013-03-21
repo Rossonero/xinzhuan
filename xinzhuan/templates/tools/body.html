@@ -18,9 +18,6 @@
     Input news article, this tool will be check for mistakes according to a wrong words database. It assumed Chinese auxiliary (的、地、得) correct usage from the part of speech.
     {% endif %}
 
-    {% if route == 'categorizer' %}
-    The tool powered by <a href="http://translate.google.com">Google translation</a> engines for Chinese to English translation, send chinese text to api and get response, which includes translated text and pinyin.
-    {% endif %}
 </p>
 
 <h3>URL</h3>
@@ -41,14 +38,13 @@
         <li><b>content</b> - The news article you want check. The more word this article contain, the more time will be cost.</li>
         {% endif %}
 
-        {% if route == 'categorizer' %}
-        {% endif %}
-
         <h4>Sample request</h4>
         <div class="well sample">curl <span style="color:#D14">"http://xinzhuan.info/api/tools/{{route}}.json"</span> --data 
-            <span style="color:#D14">{% if route == 'ictclas' %}"content=中国报纸分析是对中国大陆出版的报纸进行内容分析&frequency_limit=1"</span>{% endif %}
-            {% if route == 'translation' %}"content=中国报纸分析&show_pinyin=1"</span>{% endif %}
-            {% if route == 'check' %}"content=分析中国的报纸需要认真地收集详细地资料并系统的处理才能得到里想的结果"<{% endif %}/span>
+            <span style="color:#D14">
+                {% if route == 'ictclas' %}"content=中国报纸分析是对中国大陆出版的报纸进行内容分析&frequency_limit=1"{% endif %}
+                {% if route == 'translation' %}"content=中国报纸分析&show_pinyin=1"</span>{% endif %}
+                {% if route == 'check' %}"content=分析中国的报纸需要认真地收集详细地资料并系统的处理才能得到里想的结果"{% endif %}
+            </span>
         </div>
         
     </ul>
@@ -58,8 +54,8 @@
         <li><b>response</b>
             <ul>
                 {% if route == 'ictclas' %}
-                <li><b>result</b> - </li>
-                <li><b>word_frequency</b> - Calculated result of word frequency, calculates exactly include <b>\n \v \a</b>.</li>
+                <li><b>result</b> - Return divided word and tagged part of word. <b>/n = noun; /v = verb; /a = adjective; /d = adverb;</b></li>
+                <li><b>word_frequency</b> - Calculated result of word frequency, calculates exactly include <b>/n /v /a</b>.</li>
                 {% endif %}
 
                 {% if route == 'translation' %}
@@ -108,7 +104,7 @@
     </ul>
 
 <h3>Demo</h3>
-    <textarea name="" id="" rows="10" style="width:100%;">{% if route == 'translation' %}中国报纸分析{% endif %} {% if route == 'check' %}分析中国的报纸需要认真地收集详细地资料并系统的处理才能得到里想的结果{% endif %}</textarea>
+    <textarea name="" id="" rows="10" style="width:100%;">{% if route == 'translation' %}中国报纸分析{% endif %}{% if route == 'check' %}分析中国的报纸需要认真地收集详细地资料并系统的处理才能得到里想的结果{% endif %}</textarea>
     <button class="btn btn-success submit">Submit</button>&nbsp;{% if route == 'ictclas' %}<button class="btn load-article">Load random article</button> <button class="btn" onclick="$('textarea').val('')">Empty</button>{% endif %}
     <h4>Result</h4>
         <blockquote class="result">
