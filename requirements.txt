@@ -3,3 +3,4 @@ requests
 MySQL-python
 beautifulsoup4
 python-dateutil
+jieba

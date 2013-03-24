@@ -10,7 +10,7 @@ def handler(request, route):
         'ictclas' : 'ICTCLAS',
         'translation' : 'Chinese Translation',
         'check' : 'Error Check',
-        'categorizer' : 'Categorizer',
+        'jieba' : 'Jieba',
     }
     ctx['title'] = title[route]
     return TemplateResponse(request, 'tools/body.html', ctx)

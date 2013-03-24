@@ -10,6 +10,10 @@
     <a href="http://www.ictclas.org/">ICTCLAS</a> (Institute of Computing Technology,Chinese Lexical Analysis System){% trans " is a system developed by Institute of Computing Technology, Chinese Academy of Sciences. This tool power by ICTCLAS, written in Python, can be use to divided Chinese word, tagged part of Chinese word, calculated word frequency. "%}
     {% endif %}
 
+    {% if route == 'jieba' %}
+    A Python library to divided word, tagged part of word like ICTCLAS. Although slower than ICTCLAS but it is open source. Can extracte keywords from text.
+    {% endif %}
+
     {% if route == 'translation' %}
     The tool powered by <a href="http://translate.google.com">Google translation</a> engines for Chinese to English translation, send chinese text to api and get response, which includes translated text and pinyin.
     {% endif %}
@@ -105,7 +109,7 @@
 
 <h3>Demo</h3>
     <textarea name="" id="" rows="10" style="width:100%;">{% if route == 'translation' %}中国报纸分析{% endif %}{% if route == 'check' %}分析中国的报纸需要认真地收集详细地资料并系统的处理才能得到里想的结果{% endif %}</textarea>
-    <button class="btn btn-success submit">Submit</button>&nbsp;{% if route == 'ictclas' %}<button class="btn load-article">Load random article</button> <button class="btn" onclick="$('textarea').val('')">Empty</button>{% endif %}
+    <button class="btn btn-success submit">Submit</button>&nbsp;{% if route == 'ictclas' or route == 'jieba' %}<button class="btn load-article">Load random article</button> <button class="btn" onclick="$('textarea').val('')">Empty</button>{% endif %}
     <h4>Result</h4>
         <blockquote class="result">
             <p class="muted">The results of the query will be displayed here.</p>
@@ -126,18 +130,30 @@ $('.submit').click(function(e){
     var content = $('textarea').val();
     $.post('/api/tools/{{route}}.json', {'content': content}, function(rsp){
     
-        var extraContent = $('<div class="extra"><h4></h4><p></p></div>');
-        {% if route == 'ictclas' %}
-        extraContent.find('h4').text('Word Frequency');
-        extraContent.find('p').text(rsp.response.word_frequency);
+        var extraContent = $('<div class="extra"><h4></h4><p></p></div>'),
+            title = '',
+            content;
+        {% if route == 'ictclas' or route == 'jieba' %}
+        title = 'Word Frequency';
+        content = rsp.response.word_frequency
         {% endif %}
+
 
         {% if route == 'translation' %}
-        extraContent.find('h4').text('Pinyin');
-        extraContent.find('p').text(rsp.response.pinyin);
+        title = 'Pinyin';
+        content = rsp.response.pinyin;
         {% endif %}
 
-        $('.extra').length == 0 ? extraContent.insertAfter('.result') : '';
+        if ($('.extra').length == 0){
+            extraContent.insertAfter('.result');
+            title && extraContent.find('h4').text(title);
+            content && extraContent.find('p').text(content);
+        }
+        else{
+            title && $('.extra').find('h4').text(title);
+            content && $('.extra').find('p').text(content);
+        }
+        
         $('.result p').removeClass('muted').text(rsp.response.result);
     }, 'json');
 });

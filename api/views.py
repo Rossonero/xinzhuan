@@ -1,5 +1,5 @@
 # -*- coding:utf-8 -*-
-from django.db.models import Count, Sum
+from django.db.models import Count, Sum, Q
 from django.core import serializers
 from django.core.paginator import Paginator
 from django.contrib.auth.models import User
@@ -25,6 +25,9 @@ import time
 import urllib
 import re
 import datetime
+# import jieba as Jieba
+# import jieba.analyse as KeywordsAnalyse
+# import jieba.posseg as pseg
 from dateutil.relativedelta import relativedelta
 
 @commit_on_success
@@ -39,6 +42,19 @@ def route(request, app_name, interface):
 class Apis():
     def _date_handler(self, obj):
         return obj.isoformat() if hasattr(obj, 'isoformat') else obj
+
+    def _word_frequency(self, word_array, word_frequency_limit=1):
+        word_frequency = {}
+        # allow_parts_of_speech = ['n', 'v', 'a']
+        ignore_speech  = ['是/v', '有/v', '-/n', '的/uj']
+        handled_word_array = []
+        for word in word_array:
+            if len(word) > 0 and word not in ignore_speech: handled_word_array.append(word)
+        for word in set(handled_word_array):
+            if handled_word_array.count(word) >= word_frequency_limit: word_frequency[word] = handled_word_array.count(word)
+
+        sorted_word_frequency = sorted(word_frequency.iteritems(), key=lambda (k, v) : (v,k))
+        return list(reversed(sorted_word_frequency))
 
     def _content_handler(self, content, summary=True):
         soup = BeautifulSoup(content)
@@ -77,19 +93,18 @@ class Apis():
             data['timeline']['date'] = []
 
             originated_date = datetime.datetime.strptime('2012-01-01', '%Y-%m-%d')
-            medium_id = 951#int(request.GET.get('medium_id'))
+            medium_id = int(request.GET.get('medium_id'))
             for i in range(12):
                 start_date  = originated_date + relativedelta(months=+i)
                 end_date    = originated_date + relativedelta(months=+i+1)
-                article_id_list    = Article.objects.filter(medium_id=medium_id).filter(publication_date__gt=start_date).filter(publication_date__lt=end_date).values_list('id', flat=True)
-                words       = Word.objects.filter(article_id__in=article_id_list).values('word', 'frequency').order_by('-frequency')
+                words       = Word.objects.filter(medium_id=medium_id).filter(publication_date__gt=start_date).filter(publication_date__lt=end_date).filter(category='x')
 
                 _d = {}
                 for word in words:
-                    if word['word'] in _d:
-                        _d[word['word']] += word['frequency']
+                    if word.word in _d:
+                        _d[word.word] += int(word.frequency)
                     else:
-                        _d[word['word']] = word['frequency']
+                        _d[word.word] = int(word.frequency)
                 _d = sorted(_d.iteritems(), key=lambda (k, v): (v,k))
 
                 monthly_chart_data = unicode([list(e) for e in _d[::-1][:15]]).replace('L', '').replace('[u', '[')
@@ -100,27 +115,31 @@ class Apis():
                             '<script>$.jqplot("id_chart_'+str(i)+'", ['+monthly_chart_data+'], {seriesDefaults:{renderer:$.jqplot.BarRenderer,rendererOptions: {varyBarColor: true}},axes:{xaxis:{renderer: $.jqplot.CategoryAxisRenderer}}}); XINZHUAN.words['+str(i+1)+'] = '+monthly_chart_data+';</script>'
                 })
                 # break
-
-
-            return HttpResponse(json.dumps(data))
+            response = json.dumps(data)
+            # f = open('%d.json' % medium_id)
+            # response = f.read()
+            # f.close()
+            return HttpResponse(response)
 
 
         def word():
             word = request.REQUEST.get('word')
             originated_date = datetime.datetime.strptime('2012-01-01', '%Y-%m-%d')
-            medium_id = 951#int(request.GET.get('medium_id'))
+            medium_id = int(request.GET.get('medium_id'))
             word_frequency_sum_list = []
             month_list = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
             for i in range(12):
 
-                start_date  = originated_date + relativedelta(months=+i)
-                end_date    = originated_date + relativedelta(months=+i+1)
+                try:
+                    start_date  = originated_date + relativedelta(months=+i)
+                    end_date    = originated_date + relativedelta(months=+i+1)
 
-                word_frequency_sum = Word.objects.filter(word=word).aggregate(sum=Sum('frequency'))['sum'] or 0
-  
+                    word_frequency_sum = Word.objects.filter(word=word).filter(publication_date__gt=start_date).filter(publication_date__lt=end_date).aggregate(sum=Sum('frequency'))['sum'] or 0
+                except:
+                    word_frequency_sum = 0
 
                 word_frequency_sum_list.append(['%s 1' % month_list[i], word_frequency_sum])
-                
+
             return self._response(word_frequency_sum_list)
 
         def detail():
@@ -156,7 +175,7 @@ class Apis():
         return eval(INTERFACES[interface])
 
     def tools(self, request, interface):
-        INTERFACES = { i : i + '()' for i in ['ictclas', 'translation', 'check', 'resort', 'delete'] }
+        INTERFACES = { i : i + '()' for i in ['ictclas', 'translation', 'check', 'jieba', 'delete'] }
 
         def ictclas():
             ictclas = PyICTCLAS()
@@ -167,18 +186,24 @@ class Apis():
             response = {
                 'result' : ictclas.ictclas_paragraphProcess(content, CodeType.CODE_TYPE_UTF8).value.lstrip()
             }
-            word_array = []
-            word_frequency = {}
-            allow_parts_of_speech = ['n', 'v', 'a']
-            ignore_speech  = ['是/v', '有/v', '-/n']
-            for word in response['result'].split(' '):
-                if len(word) > 0 and word[-1] in allow_parts_of_speech and word not in ignore_speech: word_array.append(word)
-            for word in set(word_array):
-                if word_array.count(word) >= word_frequency_limit: word_frequency[word] = word_array.count(word)
 
-            sorted_word_frequency = sorted(word_frequency.iteritems(), key=lambda (k, v) : (v,k))
-            response['word_frequency'] = list(reversed(sorted_word_frequency))
+            response['word_frequency'] = self._word_frequency(response['result'].split(' '), word_frequency_limit)
             return self._response(response)
+
+        # def jieba():
+        #     Jieba.load_userdict('userdict.txt')            
+        #     content = request.POST.get('content')
+        #     words = pseg.cut(content)
+        #     word_array = []
+        #     for w in words:
+        #         if len(w.word.strip()) > 0: word_array.append(w.word + '/' + w.flag)
+
+        #     response = {
+        #         'result' : ' '.join(word_array),
+        #         'keywords' : KeywordsAnalyse.extract_tags(content),
+        #         'word_frequency' : self._word_frequency(word_array)
+        #     }
+        #     return self._response(response)
 
         def translation():
             content = request.POST.get('content').encode('utf-8')
