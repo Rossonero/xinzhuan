@@ -25,9 +25,9 @@ import time
 import urllib
 import re
 import datetime
-# import jieba as Jieba
-# import jieba.analyse as KeywordsAnalyse
-# import jieba.posseg as pseg
+import jieba as Jieba
+import jieba.analyse as KeywordsAnalyse
+import jieba.posseg as pseg
 from dateutil.relativedelta import relativedelta
 
 @commit_on_success
@@ -94,31 +94,32 @@ class Apis():
 
             originated_date = datetime.datetime.strptime('2012-01-01', '%Y-%m-%d')
             medium_id = int(request.GET.get('medium_id'))
-            for i in range(12):
-                start_date  = originated_date + relativedelta(months=+i)
-                end_date    = originated_date + relativedelta(months=+i+1)
-                words       = Word.objects.filter(medium_id=medium_id).filter(publication_date__gt=start_date).filter(publication_date__lt=end_date).filter(category='x')
+            # for i in range(12):
+            #     start_date  = originated_date + relativedelta(months=+i)
+            #     end_date    = originated_date + relativedelta(months=+i+1)
+            #     words       = Word.objects.filter(medium_id=medium_id).filter(publication_date__gt=start_date).filter(publication_date__lt=end_date)
 
-                _d = {}
-                for word in words:
-                    if word.word in _d:
-                        _d[word.word] += int(word.frequency)
-                    else:
-                        _d[word.word] = int(word.frequency)
-                _d = sorted(_d.iteritems(), key=lambda (k, v): (v,k))
+            #     _d = {}
+            #     for word in words:
+            #         if word.word in _d:
+            #             _d[word.word] += int(word.frequency)
+            #         else:
+            #             _d[word.word] = int(word.frequency)
+            #     _d = sorted(_d.iteritems(), key=lambda (k, v): (v,k))
 
-                monthly_chart_data = unicode([list(e) for e in _d[::-1][:15]]).replace('L', '').replace('[u', '[')
-                data['timeline']['date'].append({
-                    'startDate' : start_date.strftime('%Y,%m'),
-                    'headline' : 'Frequent word on %s' % start_date.strftime('%B'),
-                    'text': '<div id="id_chart_'+str(i)+'" style="width:700px; height:260px;margin-right:30px;"></div>' + 
-                            '<script>$.jqplot("id_chart_'+str(i)+'", ['+monthly_chart_data+'], {seriesDefaults:{renderer:$.jqplot.BarRenderer,rendererOptions: {varyBarColor: true}},axes:{xaxis:{renderer: $.jqplot.CategoryAxisRenderer}}}); XINZHUAN.words['+str(i+1)+'] = '+monthly_chart_data+';</script>'
-                })
-                # break
-            response = json.dumps(data)
-            # f = open('%d.json' % medium_id)
-            # response = f.read()
-            # f.close()
+            #     monthly_chart_data = unicode([list(e) for e in _d[::-1][:15]]).replace('L', '').replace('[u', '[')
+            #     data['timeline']['date'].append({
+            #         'startDate' : start_date.strftime('%Y,%m'),
+            #         'headline' : 'Frequent word on %s' % start_date.strftime('%B'),
+            #         'text': '<div id="id_chart_'+str(i)+'" style="width:700px; height:260px;margin-right:30px;"></div>' + 
+            #                 '<script>$.jqplot("id_chart_'+str(i)+'", ['+monthly_chart_data+'], {seriesDefaults:{renderer:$.jqplot.BarRenderer,rendererOptions: {varyBarColor: true}},axes:{xaxis:{renderer: $.jqplot.CategoryAxisRenderer}}}); XINZHUAN.words['+str(i+1)+'] = '+monthly_chart_data+';</script>'
+            #     })
+            #     # break
+            # response = json.dumps(data)
+            f = open('data/%d.json' % medium_id)
+            # f.write(response)
+            response = f.read()
+            f.close()
             return HttpResponse(response)
 
 
@@ -190,20 +191,20 @@ class Apis():
             response['word_frequency'] = self._word_frequency(response['result'].split(' '), word_frequency_limit)
             return self._response(response)
 
-        # def jieba():
-        #     Jieba.load_userdict('userdict.txt')            
-        #     content = request.POST.get('content')
-        #     words = pseg.cut(content)
-        #     word_array = []
-        #     for w in words:
-        #         if len(w.word.strip()) > 0: word_array.append(w.word + '/' + w.flag)
+        def jieba():
+            Jieba.load_userdict('userdict.txt')            
+            content = request.POST.get('content')
+            words = pseg.cut(content)
+            word_array = []
+            for w in words:
+                if len(w.word.strip()) > 0: word_array.append(w.word + '/' + w.flag)
 
-        #     response = {
-        #         'result' : ' '.join(word_array),
-        #         'keywords' : KeywordsAnalyse.extract_tags(content),
-        #         'word_frequency' : self._word_frequency(word_array)
-        #     }
-        #     return self._response(response)
+            response = {
+                'result' : ' '.join(word_array),
+                'keywords' : KeywordsAnalyse.extract_tags(content),
+                'word_frequency' : self._word_frequency(word_array)
+            }
+            return self._response(response)
 
         def translation():
             content = request.POST.get('content').encode('utf-8')
