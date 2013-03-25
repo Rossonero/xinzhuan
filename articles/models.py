@@ -25,7 +25,8 @@ class Article(models.Model):
         for e in self.get_word_frequency():
             word, flag = e[0].split('/')
             try:
-                new_word, created = Word.objects.get_or_create(word=word, category=flag, article=self, publication_date=self.publication_date, medium=self.medium, frequency=e[-1])
+                if e[-1] > 2:
+                    new_word, created = Word.objects.get_or_create(word=word, category=flag, article=self, publication_date=self.publication_date, medium=self.medium, frequency=e[-1])
             except:
                 print self.title
 

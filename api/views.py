@@ -25,9 +25,9 @@ import time
 import urllib
 import re
 import datetime
-import jieba as Jieba
-import jieba.analyse as KeywordsAnalyse
-import jieba.posseg as pseg
+# import jieba as Jieba
+# import jieba.analyse as KeywordsAnalyse
+# import jieba.posseg as pseg
 from dateutil.relativedelta import relativedelta
 
 @commit_on_success
@@ -85,7 +85,7 @@ class Apis():
         return HttpResponse(json.dumps({'code': 0, 'response': data }, default=self._date_handler))
 
     def articles(self, request, interface):
-        INTERFACES = { i : i + '()' for i in ['detail', 'monthly_keywords', 'edit', 'resort', 'word'] }
+        INTERFACES = { i : i + '()' for i in ['detail', 'monthly_keywords', 'edit', 'list', 'word'] }
 
         def monthly_keywords():
             data = {}
@@ -122,26 +122,39 @@ class Apis():
             f.close()
             return HttpResponse(response)
 
-
         def word():
             word = request.REQUEST.get('word')
             originated_date = datetime.datetime.strptime('2012-01-01', '%Y-%m-%d')
-            medium_id = int(request.GET.get('medium_id'))
+            medium_id = int(request.POST.get('medium_id'))
             word_frequency_sum_list = []
             month_list = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
             for i in range(12):
 
-                try:
-                    start_date  = originated_date + relativedelta(months=+i)
-                    end_date    = originated_date + relativedelta(months=+i+1)
+                start_date  = originated_date + relativedelta(months=+i)
+                end_date    = originated_date + relativedelta(months=+i+1)
+                word_frequency_sum = Word.objects.filter(word=word).filter(medium_id=medium_id).filter(publication_date__gt=start_date).filter(publication_date__lt=end_date).aggregate(sum=Sum('frequency'))['sum'] or 0
 
-                    word_frequency_sum = Word.objects.filter(word=word).filter(publication_date__gt=start_date).filter(publication_date__lt=end_date).aggregate(sum=Sum('frequency'))['sum'] or 0
-                except:
-                    word_frequency_sum = 0
 
                 word_frequency_sum_list.append(['%s 1' % month_list[i], word_frequency_sum])
 
             return self._response(word_frequency_sum_list)
+
+        def list():
+            originated_date = datetime.datetime.strptime('2012-01-01', '%Y-%m-%d')
+            medium_id = int(request.REQUEST.get('medium_id'))
+            i = int(request.REQUEST.get('i'))
+            word = request.REQUEST.get('word')
+
+            start_date  = originated_date + relativedelta(months=+i)
+            end_date    = originated_date + relativedelta(months=+i+1)
+
+            words       = Word.objects.filter(medium_id=medium_id).filter(word=word).filter(publication_date__gt=start_date).filter(publication_date__lt=end_date)
+            article_list = []
+            for word in words:
+                article_list.append(model_to_dict(word.article))
+            return self._response(article_list)
+
+
 
         def detail():
             article_id = int(request.REQUEST.get('article_id'))
@@ -191,7 +204,7 @@ class Apis():
             response['word_frequency'] = self._word_frequency(response['result'].split(' '), word_frequency_limit)
             return self._response(response)
 
-        def jieba():
+        # def jieba():
             Jieba.load_userdict('userdict.txt')            
             content = request.POST.get('content')
             words = pseg.cut(content)

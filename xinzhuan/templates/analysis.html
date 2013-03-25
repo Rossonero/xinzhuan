@@ -74,13 +74,12 @@ function renderWordData(month, pointIndex){
         $('#id_word_chart').prev().remove();
         $('#id_word_chart').prev().remove();
         $('#id_word_chart').remove();
-    }
+    };
     var word = XINZHUAN.words[month][pointIndex][0];
-    var wordChart = $('<h3>Word frequency ( Monthly )</h3><p class="text-info">China ( Chinese: 人 ) was frequency inrer , click point will be display.</p><div id="id_word_chart"></div>');
+    var wordChart = $('<h3>Word frequency ( Monthly )</h3><p class="text-info"> ( Chinese:  '+word+') , click point will be display article list.</p><div id="id_word_chart"></div>');
     $('.span12').append(wordChart);
-    $.post('/api/articles/word.json?medium_id={{medium.id}}', {"word": word}, function(rsp){
+    $.post('/api/articles/word.json', {"word": word, "medium_id" : {{medium.id}} }, function(rsp){
         var json = rsp.response;
-
         $.jqplot('id_word_chart', [json], {
             axes:{
                 xaxis:{
@@ -102,8 +101,30 @@ function renderWordData(month, pointIndex){
                 show: false
             }
         });
+
+        $('#id_word_chart').bind('jqplotDataClick', 
+            function (ev, seriesIndex, pointIndex, data) {
+                var articleList = $('<h3>Article Lit</h3><div id="id_article_list"></div>');
+                articleList.insertAfter($('#id_word_chart'));
+                $.post('/api/articles/list.json', {"i" : pointIndex, "word" : word, "medium_id" : {{medium.id}} }, function(rsp){
+                    var json = rsp.response;
+                    for (var i = json.length - 1; i >= 0; i--) {
+                        var article = json[i],
+                            articleTemplate = '<h4>' + article.title + '</h4>' + 
+                                                '<span class="meta">on ' + article.publication_date + '(' + article.issue + ')</span>';
+                                                // '<p>' + article.content + '</p>';
+
+                        $('#id_article_list').append(articleTemplate);
+                    };
+                },'json');
+            }
+        );
+
+
     },'json');
 };
+
+
 
 $(document).on('mouseenter', 'div[id^="id_chart_"]', function(){
     $(this).off('jqplotDataClick');
