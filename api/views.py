@@ -25,9 +25,10 @@ import time
 import urllib
 import re
 import datetime
-# import jieba as Jieba
-# import jieba.analyse as KeywordsAnalyse
-# import jieba.posseg as pseg
+import jieba as Jieba
+Jieba.load_userdict('userdict.txt')
+import jieba.analyse as KeywordsAnalyse
+import jieba.posseg as pseg
 from dateutil.relativedelta import relativedelta
 
 @commit_on_success
@@ -204,8 +205,8 @@ class Apis():
             response['word_frequency'] = self._word_frequency(response['result'].split(' '), word_frequency_limit)
             return self._response(response)
 
-        # def jieba():
-            Jieba.load_userdict('userdict.txt')            
+        def jieba():
+            
             content = request.POST.get('content')
             words = pseg.cut(content)
             word_array = []

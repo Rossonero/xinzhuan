@@ -33,6 +33,10 @@
         <li><b>frequency_limit</b> - Only word frequecy is greater than or equal to than <i>frequency_limit</i> will be response. <b>Default: 3</b></li>
         {% endif %}
 
+        {% if route == 'jieba' %}
+        <li><b>content</b> - Content which you want handle. Anything but Chinese rarely makes sense anyway.</li>
+        {% endif %}
+
         {% if route == 'translation' %}
         <li><b>content</b> - The content you want to translate.</li>
         <li><b>show_pinyin</b> - Sets whether the Chinese pinyin included. Possible values are: <i>1, 0</i>. <b>Default: 0</b></li>
@@ -46,6 +50,7 @@
         <div class="well sample">curl <span style="color:#D14">"http://xinzhuan.info/api/tools/{{route}}.json"</span> --data 
             <span style="color:#D14">
                 {% if route == 'ictclas' %}"content=中国报纸分析是对中国大陆出版的报纸进行内容分析&frequency_limit=1"{% endif %}
+                {% if route == 'jieba' %}"content=中国报纸分析是对中国大陆出版的报纸进行内容分析"{% endif %}
                 {% if route == 'translation' %}"content=中国报纸分析&show_pinyin=1"</span>{% endif %}
                 {% if route == 'check' %}"content=分析中国的报纸需要认真地收集详细地资料并系统的处理才能得到里想的结果"{% endif %}
             </span>
@@ -60,6 +65,11 @@
                 {% if route == 'ictclas' %}
                 <li><b>result</b> - Return divided word and tagged part of word. <b>/n = noun; /v = verb; /a = adjective; /d = adverb;</b></li>
                 <li><b>word_frequency</b> - Calculated result of word frequency, calculates exactly include <b>/n /v /a</b>.</li>
+                {% endif %}
+
+                {% if route == 'jieba' %}
+                <li><b>result</b> - Return divided word and tagged part of word. <b>/n = noun; /v = verb; /a = adjective; /d = adverb;</b></li>
+                <li><b>keywords</b> - The words used to describe the content. </li>
                 {% endif %}
 
                 {% if route == 'translation' %}
@@ -88,6 +98,17 @@
 }</xmp>
 {% endif %}
 
+{% if route == 'jieba' %}
+<xmp class="well sample">{
+  "code": 0,
+  "response": 
+    {
+     "result": "中国/ns 报纸/n 分析/vn 是/v 对/p 中国/ns 大陆/n 出版/v 的/uj 报纸/n 进行/v 内容分析/l" ,
+     "keywords": [报纸, 内容分析, 出版, 大陆, 中国, 分析, 进行]
+    }
+}</xmp>
+{% endif %}
+
 {% if route == 'translation' %}
 <xmp class="well sample">{
   "code": 0,
@@ -108,7 +129,7 @@
     </ul>
 
 <h3>Demo</h3>
-    <textarea name="" id="" rows="10" style="width:100%;">{% if route == 'translation' %}中国报纸分析{% endif %}{% if route == 'check' %}分析中国的报纸需要认真地收集详细地资料并系统的处理才能得到里想的结果{% endif %}</textarea>
+    <textarea name="" id="" rows="10" style="width:100%;">{% if route == 'ictclas' or route == 'jieba' %}中国报纸分析是对中国大陆出版的报纸进行内容分析{% endif %}{% if route == 'translation' %}中国报纸分析{% endif %}{% if route == 'check' %}分析中国的报纸需要认真地收集详细地资料并系统的处理才能得到里想的结果{% endif %}</textarea>
     <button class="btn btn-success submit">Submit</button>&nbsp;{% if route == 'ictclas' or route == 'jieba' %}<button class="btn load-article">Load random article</button> <button class="btn" onclick="$('textarea').val('')">Empty</button>{% endif %}
     <h4>Result</h4>
         <blockquote class="result">
@@ -127,17 +148,23 @@ $('.load-article').click(function(e){
 });
 
 $('.submit').click(function(e){
-    var content = $('textarea').val();
+    var content = $('textarea').val(),
+        button = $(this);
+    button.prop('disabled', true).text('Loading...');
     $.post('/api/tools/{{route}}.json', {'content': content}, function(rsp){
     
         var extraContent = $('<div class="extra"><h4></h4><p></p></div>'),
             title = '',
             content;
-        {% if route == 'ictclas' or route == 'jieba' %}
+        {% if route == 'ictclas' %}
         title = 'Word Frequency';
         content = rsp.response.word_frequency
         {% endif %}
 
+        {% if route == 'jieba' %}
+        title = 'Keywords';
+        content = rsp.response.keywords
+        {% endif %}
 
         {% if route == 'translation' %}
         title = 'Pinyin';
@@ -155,6 +182,7 @@ $('.submit').click(function(e){
         }
         
         $('.result p').removeClass('muted').text(rsp.response.result);
+        button.prop('disabled', false).text('Submit');
     }, 'json');
 });
 
