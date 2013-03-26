@@ -74,6 +74,9 @@ function renderWordData(month, pointIndex){
         $('#id_word_chart').prev().remove();
         $('#id_word_chart').prev().remove();
         $('#id_word_chart').remove();
+
+        $('#id_article_list').prev().remove();
+        $('#id_article_list').remove();
     };
     var word = XINZHUAN.words[month][pointIndex][0];
     var wordChart = $('<h3>Word frequency ( Monthly )</h3><p class="text-info"> ( Chinese:  '+word+') , click point will be display article list.</p><div id="id_word_chart"></div>');
@@ -101,21 +104,30 @@ function renderWordData(month, pointIndex){
                 show: false
             }
         });
+        $('html, body').animate({
+            scrollTop: $("#id_word_chart").offset().top
+         }, 1000);
 
         $('#id_word_chart').bind('jqplotDataClick', 
             function (ev, seriesIndex, pointIndex, data) {
-                var articleList = $('<h3>Article Lit</h3><div id="id_article_list"></div>');
+                var articleList = $('<h3>Article List</h3><div id="id_article_list"></div>');
+                $('#id_article_list').prev().remove();
+                $('#id_article_list').remove();
+
                 articleList.insertAfter($('#id_word_chart'));
                 $.post('/api/articles/list.json', {"i" : pointIndex, "word" : word, "medium_id" : {{medium.id}} }, function(rsp){
                     var json = rsp.response;
                     for (var i = json.length - 1; i >= 0; i--) {
                         var article = json[i],
                             articleTemplate = '<h4>' + article.title + '</h4>' + 
-                                                '<span class="meta">on ' + article.publication_date + '(' + article.issue + ')</span>';
-                                                // '<p>' + article.content + '</p>';
+                                                '<span class="meta">on ' + article.publication_date + ' issue ' + article.issue + '</span>' +
+                                                '<blockquote>' + article.summary + '</blockquote>';
 
                         $('#id_article_list').append(articleTemplate);
                     };
+                    $('html, body').animate({
+                        scrollTop: $("#id_article_list").offset().top
+                    }, 1000);
                 },'json');
             }
         );

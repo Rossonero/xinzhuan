@@ -108,15 +108,17 @@ class Apis():
             #             _d[word.word] = int(word.frequency)
             #     _d = sorted(_d.iteritems(), key=lambda (k, v): (v,k))
 
-            #     monthly_chart_data = unicode([list(e) for e in _d[::-1][:15]]).replace('L', '').replace('[u', '[')
+            #     line = [[e[0], e[-1]] for e in _d[::-1][:15]]
+
+            #     monthly_chart_data = unicode(line).replace('L', '').replace('[u', '[')
             #     data['timeline']['date'].append({
             #         'startDate' : start_date.strftime('%Y,%m'),
             #         'headline' : 'Frequent word on %s' % start_date.strftime('%B'),
             #         'text': '<div id="id_chart_'+str(i)+'" style="width:700px; height:260px;margin-right:30px;"></div>' + 
             #                 '<script>$.jqplot("id_chart_'+str(i)+'", ['+monthly_chart_data+'], {seriesDefaults:{renderer:$.jqplot.BarRenderer,rendererOptions: {varyBarColor: true}},axes:{xaxis:{renderer: $.jqplot.CategoryAxisRenderer}}}); XINZHUAN.words['+str(i+1)+'] = '+monthly_chart_data+';</script>'
             #     })
-            #     # break
             # response = json.dumps(data)
+
             f = open('data/%d.json' % medium_id)
             # f.write(response)
             response = f.read()
@@ -135,7 +137,6 @@ class Apis():
                 end_date    = originated_date + relativedelta(months=+i+1)
                 word_frequency_sum = Word.objects.filter(word=word).filter(medium_id=medium_id).filter(publication_date__gt=start_date).filter(publication_date__lt=end_date).aggregate(sum=Sum('frequency'))['sum'] or 0
 
-
                 word_frequency_sum_list.append(['%s 1' % month_list[i], word_frequency_sum])
 
             return self._response(word_frequency_sum_list)
@@ -151,8 +152,10 @@ class Apis():
 
             words       = Word.objects.filter(medium_id=medium_id).filter(word=word).filter(publication_date__gt=start_date).filter(publication_date__lt=end_date)
             article_list = []
-            for word in words:
-                article_list.append(model_to_dict(word.article))
+            for word in words[:20]:
+                article = model_to_dict(word.article)
+                article['summary'] = article['content'][:200] + '...'
+                article_list.append(article)
             return self._response(article_list)
 
 
@@ -160,8 +163,8 @@ class Apis():
         def detail():
             article_id = int(request.REQUEST.get('article_id'))
             article = Article.objects.get(pk=article_id)
-
-            return self._response(model_to_dict(article))
+            data = model_to_dict(article)
+            return self._response(data)
         return eval(INTERFACES[interface])
 
 
