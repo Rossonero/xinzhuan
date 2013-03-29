@@ -4,6 +4,7 @@ from django.utils.translation import ugettext as _
 from misc.models import Area
 
 import journalists
+import articles
 
 LANGUAGE_CHOICE = (
     ('zh', 'Chinese'),
@@ -44,6 +45,15 @@ class Medium(models.Model):
             content = ', '.join([ j.name for j in journalists.models.Journalist.objects.filter(medium=self)])
             return '<a href="javascript:void(0)" data-content="%s">%s</a>' % (content, str(count))
         return count
+
+    def journalist_count(self):
+        return journalists.models.Journalist.objects.filter(medium=self).count()
+
+    def article_count(self):
+        return articles.models.Article.objects.filter(medium=self).count()
+
+    def photo_count(self):
+        return 0
 
 class Unit(models.Model):
     name   = models.CharField(max_length=128)

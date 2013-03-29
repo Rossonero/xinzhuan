@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="row">
-    <div class="span8">
+    <div class="span8 summary">
         <h2><i>{{medium.english_name}}</i></h2>
             <h4>Summary</h4>
             <p>
@@ -14,13 +14,15 @@
                 {% if medium.id == 951 %}Weekly newspaper based in Guangzhou, People's Republic of China. It is considered the most outspoken newspaper, strongly recommended by liberal intellectuals and is said to contribute to public democratic debate and the formation of civil society.
                 {% endif %}
             </p>
-            <h4>Filter</h4>
-            <form class="form-search">
+            <h4>Sample Numbers</h4>
+            <p class="meta"> <i class="icon-book" title="Articles"></i> {{medium.article_count}}  <i class="icon-user" title="Journalists"></i> {{medium.journalist_count}}&nbsp;&nbsp;<i class="icon-camera" title="Photos"></i> {{medium.photo_count}}</p>
+
+            <!--form class="form-search">
                 <div class="input-append">
                     <input type="text" class="span2 search-query">
                     <button type="submit" class="btn">Search</button>
                 </div>
-            </form>
+            </form-->
     </div>
     <div class="span2 offset2">
         {% if medium.id == 1081 %}<a href="http://img.xinzhuan.info/scans/1081/2012071701.jpg" target="_blank"><img class="thumbnail" width="200" src="http://img.xinzhuan.info/scans/1081/2012071701.jpg!medium"/></a>{% endif %}
