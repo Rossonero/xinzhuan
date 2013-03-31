@@ -163,6 +163,10 @@ class Apis():
         def detail():
             article_id = int(request.REQUEST.get('article_id'))
             article = Article.objects.get(pk=article_id)
+            field = request.REQUEST.get('field')
+            if field == 'content':
+                content = article.content.strip()
+                return self._response({"content" : content})
             data = model_to_dict(article)
             return self._response(data)
         return eval(INTERFACES[interface])
@@ -224,11 +228,15 @@ class Apis():
             return self._response(response)
 
         def translation():
+            response = {}
             content = request.POST.get('content').encode('utf-8')
             show_pinyin = int(request.POST.get('show_pinyin', 1))
             r = requests.get('http://translate.google.cn/translate_a/t?client=t&text='+urllib.quote(content)+'&hl=zh-CN&sl=zh-CN&tl=en&ie=UTF-8&oe=UTF-8&multires=1&prev=btn&ssel=0&tsel=0&sc=1')
-            post_translational_and_pinyin = re.search('\[\[\["(.*)]],,"zh-CN"', r.content).groups()[0].split('","')
-            response = {}
+            try:
+                post_translational_and_pinyin = re.search('\[\[\["(.*)]],,"zh-CN"', r.content).groups()[0].split('","') 
+            except:
+                post_translational_and_pinyin = re.search('\[\[\["(.*)]]]],"zh-CN"', r.content).groups()[0].split(']],[[')[0].split('","')  ##Single word
+
             response['result'] = post_translational_and_pinyin[0]
             if show_pinyin:
                 response['pinyin'] = post_translational_and_pinyin[-1][0:-1]

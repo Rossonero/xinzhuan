@@ -6,6 +6,8 @@
 <div class="row">
     <div class="span8 summary">
         <h2><i>{{medium.english_name}}</i></h2>
+            <h4>Sample Numbers</h4>
+            <p class="meta"> <i class="icon-book" title="Articles"></i> {{medium.article_count}}  <i class="icon-user" title="Journalists"></i> {{medium.journalist_count}}&nbsp;&nbsp;<i class="icon-camera" title="Photos"></i> {{medium.photo_count}}</p>
             <h4>Summary</h4>
             <p>
                 {% if medium.id == 1081 %}Daily newspaper in the People's Republic of China. The paper is an organ of the Central Committee of the Communist Party of China, published worldwide with a circulation of 3 to 4 million. Similar to Pravda's relationship with the Soviet Union, the newspaper provides direct information on the policies and viewpoints of the Party. 
@@ -14,8 +16,7 @@
                 {% if medium.id == 951 %}Weekly newspaper based in Guangzhou, People's Republic of China. It is considered the most outspoken newspaper, strongly recommended by liberal intellectuals and is said to contribute to public democratic debate and the formation of civil society.
                 {% endif %}
             </p>
-            <h4>Sample Numbers</h4>
-            <p class="meta"> <i class="icon-book" title="Articles"></i> {{medium.article_count}}  <i class="icon-user" title="Journalists"></i> {{medium.journalist_count}}&nbsp;&nbsp;<i class="icon-camera" title="Photos"></i> {{medium.photo_count}}</p>
+
 
             <!--form class="form-search">
                 <div class="input-append">
@@ -81,7 +82,7 @@ function renderWordData(month, pointIndex){
         $('#id_article_list').remove();
     };
     var word = XINZHUAN.words[month][pointIndex][0];
-    var wordChart = $('<h3>Word frequency ( Monthly )</h3><p class="text-info"> ( Chinese:  '+word+') , click point will be display article list.</p><div id="id_word_chart"></div>');
+    var wordChart = $('<h3>Word frequency ( Monthly )</h3><p class="text-info"> * Click point will be display article list.</p><div id="id_word_chart"></div>');
     $('.span12').append(wordChart);
     $.post('/api/articles/word.json', {"word": word, "medium_id" : {{medium.id}} }, function(rsp){
         var json = rsp.response;
@@ -123,7 +124,7 @@ function renderWordData(month, pointIndex){
                         var article = json[i],
                             articleTemplate = '<h4>' + article.title + '</h4>' + 
                                                 '<span class="meta">on ' + article.publication_date + ' issue ' + article.issue + '</span>' +
-                                                '<blockquote>' + article.summary + '</blockquote>';
+                                                '<blockquote>' + article.summary + '<a class="read-more" data-article-id="'+article.id.toString()+'" href="#">READ MORE</a></blockquote><div class="hide"></div>';
 
                         $('#id_article_list').append(articleTemplate);
                     };
@@ -133,12 +134,8 @@ function renderWordData(month, pointIndex){
                 },'json');
             }
         );
-
-
     },'json');
 };
-
-
 
 $(document).on('mouseenter', 'div[id^="id_chart_"]', function(){
     $(this).off('jqplotDataClick');
@@ -148,6 +145,15 @@ $(document).on('mouseenter', 'div[id^="id_chart_"]', function(){
             renderWordData(month/1+1, pointIndex);
         }
     ); 
+}).on('click', 'a.read-more', function(e){
+    var self = this;
+    $.post('/api/articles/detail.json', {"article_id" : $(this).data('article-id') , "field" : "content"}, function(rsp){
+        var content = rsp.response.content,
+            summary = $(self).parent();
+        summary.next().html(summary.html());
+        summary.html('<textarea style="width: 100%" rows="15">' + content + '</textarea><button class="btn" onclick="$(this).parent().html($(this).parent().next().html());">Cancel</button>');
+    }, 'json');
+    e.preventDefault();
 });
 </script>
 {% endblock %}
