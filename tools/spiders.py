@@ -188,9 +188,24 @@ class Spiders():
 
     def zgqnb(self):
         start_date = datetime.datetime.strptime('2012-01-01', '%Y-%m-%d')
-        for i in range(366):
+        for i in range(23,366):
             publication_date = start_date + datetime.timedelta(days=i)
             url = 'http://zqb.cyol.com/html/%s/nbs.D110000zgqnb_01.htm' % (datetime.datetime.strftime(publication_date, '%Y-%m/%d'))
+            try:
+                self._get_zgqnb_article(url, publication_date, u'第01版：要闻')
+            except:
+                continue
+
+            r = requests.get(url)
+            try:
+                pages = bs4.BeautifulSoup(r.content).find('div', {'id' : 'pageList'}).find_all('a')
+            except:
+                continue
+            for page in pages[1:len(pages)]:
+                a = page.get('href')
+                page_name = page.text
+                self._get_zgqnb_article(urljoin(url, a), publication_date, page_name)
+
     
     def cnki(self):
         domain = 'http://epub.cnki.net'
@@ -307,6 +322,36 @@ class Spiders():
         print article.title
         return article
 
+    def _get_zgqnb_article(self, url, date, page_name):
+        print url
+        medium = Medium.objects.get(pk=1836)
+        urls = bs4.BeautifulSoup(requests.get(url).content).find('div', {'id' : 'titleList'}).find_all('a')
+        for a in urls:
+            article_url = urljoin(url, a.get('href'))
+            soup = bs4.BeautifulSoup(requests.get(article_url).content)
+            title = soup.find('h1').text
+            print title
+            article = Article()
+            article.medium = medium
+            article.title = title
+            article.url = article_url
+            article.publication_date = date
+            article.page = page_name
+
+            p_list = []
+            for p in soup.find('div', {'id' : 'ozoom'}).find_all('p'):
+                p_list.append(p.text)
+            content = '\n'.join(p_list)
+            article.content = content
+            if Article.objects.filter(medium=medium).filter(url=article_url).count():
+                article = Article.objects.filter(medium=medium).get(url=article_url)
+                article.content = content
+
+            article.save()
+
+
+
+
     def _get_unit(self, unit_name):
         print unit_name
         unit, created = Unit.objects.get_or_create(name=unit_name)
@@ -320,13 +365,14 @@ class Spiders():
 
     def _get_issue_from_date(self, date, medium):
         ISSUE = {
-            'rmrb' : 23185
+            'rmrb' : 23185,
         }
         start_date = datetime.datetime.strptime('2012-01-01', '%Y-%m-%d')
         publication_date = datetime.datetime.strptime(date, '%Y-%m-%d')
         return ISSUE[medium] + (publication_date - start_date).days
 
 
+
 if __name__ == '__main__':
     s = Spiders()
-    s.cnki()
+    s.zgqnb()
