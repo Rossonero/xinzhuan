@@ -14,7 +14,7 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 from bs4 import BeautifulSoup
 
-from articles.models import Article, Word
+from articles.models import Article, Word, HotWord
 from media.models import Medium
 from journalists.models import Journalist
 from tools.pyictclas import PyICTCLAS, CodeType, POSMap
@@ -95,34 +95,27 @@ class Apis():
 
             originated_date = datetime.datetime.strptime('2012-01-01', '%Y-%m-%d')
             medium_id = int(request.GET.get('medium_id'))
-            # for i in range(12):
-            #     start_date  = originated_date + relativedelta(months=+i)
-            #     end_date    = originated_date + relativedelta(months=+i+1)
-            #     words       = Word.objects.filter(medium_id=medium_id).filter(publication_date__gt=start_date).filter(publication_date__lt=end_date)
+            monthly_chart_data = []
+            for i in range(1, 13):
+                start_date  = originated_date + relativedelta(months=+i-1)
+                words       = HotWord.objects.filter(medium_id=medium_id).filter(month=i)
 
-            #     _d = {}
-            #     for word in words:
-            #         if word.word in _d:
-            #             _d[word.word] += int(word.frequency)
-            #         else:
-            #             _d[word.word] = int(word.frequency)
-            #     _d = sorted(_d.iteritems(), key=lambda (k, v): (v,k))
+                monthly_chart_data = ['["%s<br/>(%s)",%d]' % ( word.english[:12], word.word, word.monthly_frequency)  for word in words]
+                monthly_words_data = ['{"word" : "%s", "english" : "%s"}' % (word.word, word.english) for word in words]
 
-            #     line = [[e[0], e[-1]] for e in _d[::-1][:15]]
+                data['timeline']['date'].append({
+                    'startDate' : start_date.strftime('%Y,%m'),
+                    'headline' : 'Frequent word on %s' % start_date.strftime('%B'),
+                    'text': '<div id="id_chart_'+str(i)+'" style="width:900px; height:260px;margin-left:-100px;"></div>' + 
+                            '<script>$.jqplot("id_chart_'+str(i)+'", [['+','.join(monthly_chart_data)+']], {seriesDefaults:{renderer:$.jqplot.BarRenderer,rendererOptions: {varyBarColor: true}},axes:{xaxis:{renderer: $.jqplot.CategoryAxisRenderer}}}); XINZHUAN.words['+str(i-1)+'] = ['+','.join(monthly_words_data)+'];</script>'
+                })
 
-            #     monthly_chart_data = unicode(line).replace('L', '').replace('[u', '[')
-            #     data['timeline']['date'].append({
-            #         'startDate' : start_date.strftime('%Y,%m'),
-            #         'headline' : 'Frequent word on %s' % start_date.strftime('%B'),
-            #         'text': '<div id="id_chart_'+str(i)+'" style="width:700px; height:260px;margin-right:30px;"></div>' + 
-            #                 '<script>$.jqplot("id_chart_'+str(i)+'", ['+monthly_chart_data+'], {seriesDefaults:{renderer:$.jqplot.BarRenderer,rendererOptions: {varyBarColor: true}},axes:{xaxis:{renderer: $.jqplot.CategoryAxisRenderer}}}); XINZHUAN.words['+str(i+1)+'] = '+monthly_chart_data+';</script>'
-            #     })
-            # response = json.dumps(data)
+            response = json.dumps(data)
 
-            f = open('data/%d.json' % medium_id)
+            # f = open('%d.json' % medium_id, 'w')
             # f.write(response)
-            response = f.read()
-            f.close()
+            # response = f.read()
+            # f.close()
             return HttpResponse(response)
 
         def word():

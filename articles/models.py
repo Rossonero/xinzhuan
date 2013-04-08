@@ -45,6 +45,13 @@ class Word(models.Model):
     publication_date = models.DateField()
     frequency        = models.IntegerField()
 
+class HotWord(models.Model):
+    word             = models.CharField(max_length=16)
+    english          = models.CharField(max_length=64, blank=True)
+    monthly_frequency= models.IntegerField()
+    month            = models.IntegerField()
+    medium           = models.ForeignKey(Medium)
+
 # class ErrorWord(models.Model):
 #     wrong_word             = models.CharField(max_length=16)
 #     right_word             = models.CharField(max_length=16)

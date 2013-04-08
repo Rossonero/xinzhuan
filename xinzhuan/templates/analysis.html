@@ -37,6 +37,7 @@
 <div class="row">
     <div class="span12">
         <h3>Frequent word's Timeline</h3>
+        <p class="text-info">* TIPS: Click bar chart will display monthly word frequency run chart.</p>
         <div id="timeline-embed"></div>
     </div>
 </div>
@@ -85,10 +86,10 @@ function renderWordData(month, pointIndex){
         $('#id_article_list').prev().remove();
         $('#id_article_list').remove();
     };
-    var word = XINZHUAN.words[month][pointIndex][0];
-    var wordChart = $('<h3>Word frequency ( Monthly )</h3><p class="text-info"> * Click point will be display article list.</p><div id="id_word_chart"></div>');
+    var word = XINZHUAN.words[month-1][pointIndex];
+    var wordChart = $('<h3>Word frequency ( Monthly )</h3><p class="text-info"> * TIPS2: Click point search news which contain <strong>'+ word.english +'</strong> ('+ word.word +').</p><img id="id_loading" src="/static/css/loading.gif" /><div id="id_word_chart"></div>');
     $('.span12').append(wordChart);
-    $.post('/api/articles/word.json', {"word": word, "medium_id" : {{medium.id}} }, function(rsp){
+    $.post('/api/articles/word.json', {"word": word.word, "medium_id" : {{medium.id}} }, function(rsp){
         var json = rsp.response;
         $.jqplot('id_word_chart', [json], {
             axes:{
@@ -113,16 +114,17 @@ function renderWordData(month, pointIndex){
         });
         $('html, body').animate({
             scrollTop: $("#id_word_chart").offset().top
-         }, 1000);
+        }, 1000);
+        $('#id_loading').remove();
 
         $('#id_word_chart').bind('jqplotDataClick', 
             function (ev, seriesIndex, pointIndex, data) {
-                var articleList = $('<h3>Article List</h3><div id="id_article_list"></div>');
+                var articleList = $('<h3>Article List</h3><img id="id_loading" src="/static/css/loading.gif" /><div id="id_article_list"></div>');
                 $('#id_article_list').prev().remove();
                 $('#id_article_list').remove();
 
                 articleList.insertAfter($('#id_word_chart'));
-                $.post('/api/articles/list.json', {"i" : pointIndex, "word" : word, "medium_id" : {{medium.id}} }, function(rsp){
+                $.post('/api/articles/list.json', {"i" : pointIndex, "word" : word.word, "medium_id" : {{medium.id}} }, function(rsp){
                     var json = rsp.response;
                     for (var i = json.length - 1; i >= 0; i--) {
                         var article = json[i],
@@ -131,6 +133,7 @@ function renderWordData(month, pointIndex){
                                                 '<blockquote>' + article.summary + '<a class="read-more" data-article-id="'+article.id.toString()+'" href="#">READ MORE</a></blockquote><div class="hide"></div>';
 
                         $('#id_article_list').append(articleTemplate);
+                        $('#id_loading').remove();
                     };
                     $('html, body').animate({
                         scrollTop: $("#id_article_list").offset().top
@@ -146,7 +149,7 @@ $(document).on('mouseenter', 'div[id^="id_chart_"]', function(){
     $(this).on('jqplotDataClick', 
         function (ev, seriesIndex, pointIndex, data) {
             var month = ev.currentTarget.id.replace('id_chart_','')
-            renderWordData(month/1+1, pointIndex);
+            renderWordData(month/1, pointIndex);
         }
     ); 
 }).on('click', 'a.read-more', function(e){
