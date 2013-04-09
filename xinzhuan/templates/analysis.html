@@ -30,8 +30,10 @@
             </form-->
     </div>
     <div class="span2 offset2">
-        {% if medium.id == 1081 %}<a href="http://img.xinzhuan.info/scans/1081/2012071701.jpg" target="_blank"><img class="thumbnail" width="200" src="http://img.xinzhuan.info/scans/1081/2012071701.jpg!medium"/></a>{% endif %}
-        {% if medium.id == 951 %}<img class="thumbnail" width="200" src="http://img.xinzhuan.info/scans/951/2010122301.jpg!medium"/>{% endif %}
+        {% if medium.id == 1081 %}<a href="http://img.xinzhuan.info/scans/1081/2012071701.jpg" target="_blank"><img class="thumbnail" width="200" src="http://img.xinzhuan.info/scans/1081/2012071701.jpg!medium"/></a>
+        {% else %}
+        <img class="thumbnail" width="200" src="http://img.xinzhuan.info/scans/{{medium.id}}/2012122301.jpg!medium"/>
+        {% endif %}
     </div>
 </div>
 <div class="row">

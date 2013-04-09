@@ -36,6 +36,8 @@ class Medium(models.Model):
     sponsor        = models.ForeignKey('Unit', related_name='sponsor', blank=True)
     competent_dept = models.ForeignKey('Unit', related_name='competent_dept', blank=True)
     region         = models.ForeignKey(Area, blank=True, null=True)
+    introduction   = models.TextField(blank=True)
+    cover_date     = models.DateField()
     def __unicode__(self):
         return self.name
 

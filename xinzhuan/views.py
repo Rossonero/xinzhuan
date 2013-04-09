@@ -79,10 +79,9 @@ def analysis(request, medium_id):
     return TemplateResponse(request, 'analysis.html', ctx)
 
 def newspapers(request):
-    sw = Medium.objects.get(pk=1081)
-    pd = Medium.objects.get(pk=951)
+    
     ctx = {
-        'title'
+        'newspapers' : Medium.objects.filter(english_name__isnull=False).order_by('name')
     }
     return TemplateResponse(request, 'newspapers.html', ctx)
 
