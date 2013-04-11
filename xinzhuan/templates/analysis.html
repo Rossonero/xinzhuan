@@ -9,17 +9,7 @@
             <h4>Sample Numbers</h4>
             <p class="meta"> <i class="icon-book" title="Articles"></i> {{medium.article_count}}  <i class="icon-user" title="Journalists"></i> {{medium.journalist_count}}&nbsp;&nbsp;<i class="icon-camera" title="Photos"></i> {{medium.photo_count}}</p>
             <h4>Summary</h4>
-            <p>
-                {% if medium.id == 1081 %}Daily newspaper in the People's Republic of China. The paper is an organ of the Central Committee of the Communist Party of China, published worldwide with a circulation of 3 to 4 million. Similar to Pravda's relationship with the Soviet Union, the newspaper provides direct information on the policies and viewpoints of the Party. 
-                {% endif %}
-
-                {% if medium.id == 951 %}Weekly newspaper based in Guangzhou, People's Republic of China. It is considered the most outspoken newspaper, strongly recommended by liberal intellectuals and is said to contribute to public democratic debate and the formation of civil society.
-                {% endif %}
-
-                {% if medium.id == 1836 %}
-                The official newspaper of Communist Youth League of China (CYL) (共青团), and is a popular official daily newspaper and the first independently operated central government news media portal in the People's Republic of China. Although China youth Daily is run by the CYL, it is also the first profit-generating paper in China. The profit enables the paper to support itself, and the paper welcomes individuals as well as companies to advertise in the paper.
-                {% endif %}
-            </p>
+            <p>{{medium.introduction}}</p>
 
 
             <!--form class="form-search">
@@ -32,7 +22,7 @@
     <div class="span2 offset2">
         {% if medium.id == 1081 %}<a href="http://img.xinzhuan.info/scans/1081/2012071701.jpg" target="_blank"><img class="thumbnail" width="200" src="http://img.xinzhuan.info/scans/1081/2012071701.jpg!medium"/></a>
         {% else %}
-        <img class="thumbnail" width="200" src="http://img.xinzhuan.info/scans/{{medium.id}}/2012122301.jpg!medium"/>
+        <img class="thumbnail" width="200" src="http://img.xinzhuan.info/scans/{{medium.id}}/{{medium.cover_date|date:"Ymd"}}01.jpg!medium"/>
         {% endif %}
     </div>
 </div>
@@ -81,15 +71,13 @@ for (var i = 1; i <= 12; i++) {
 
 function renderWordData(month, pointIndex){
     if ( $('#id_word_chart').length > 0 ){
-        $('#id_word_chart').prev().remove();
-        $('#id_word_chart').prev().remove();
-        $('#id_word_chart').remove();
+        $('#id_word_chart_tip, #id_word_chart_title, #id_word_chart').remove();
 
         $('#id_article_list').prev().remove();
         $('#id_article_list').remove();
     };
     var word = XINZHUAN.words[month-1][pointIndex];
-    var wordChart = $('<h3>Word frequency ( Monthly )</h3><p class="text-info"> * TIPS2: Click point search news which contain <strong>'+ word.english +'</strong> ('+ word.word +').</p><img id="id_loading" src="/static/css/loading.gif" /><div id="id_word_chart"></div>');
+    var wordChart = $('<h3 id="id_word_chart_title">Word frequency ( Monthly )</h3><p id="id_word_chart_tip" class="text-info"> * TIPS2: Click point search news which contain <strong>'+ word.english +'</strong> ('+ word.word +').</p><img id="id_loading" src="/static/css/loading.gif" /><div id="id_word_chart"></div>');
     $('.span12').append(wordChart);
     $.post('/api/articles/word.json', {"word": word.word, "medium_id" : {{medium.id}} }, function(rsp){
         var json = rsp.response;

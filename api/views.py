@@ -25,10 +25,7 @@ import time
 import urllib
 import re
 import datetime
-import jieba as Jieba
-Jieba.load_userdict('userdict.txt')
-import jieba.analyse as KeywordsAnalyse
-import jieba.posseg as pseg
+
 from dateutil.relativedelta import relativedelta
 
 @commit_on_success
@@ -206,7 +203,10 @@ class Apis():
             return self._response(response)
 
         def jieba():
-            
+            import jieba as Jieba
+            Jieba.load_userdict('userdict.txt')
+            import jieba.analyse as KeywordsAnalyse
+            import jieba.posseg as pseg
             content = request.POST.get('content')
             words = pseg.cut(content)
             word_array = []
