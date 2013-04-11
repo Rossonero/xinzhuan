@@ -72,9 +72,7 @@ for (var i = 1; i <= 12; i++) {
 function renderWordData(month, pointIndex){
     if ( $('#id_word_chart').length > 0 ){
         $('#id_word_chart_tip, #id_word_chart_title, #id_word_chart').remove();
-
-        $('#id_article_list').prev().remove();
-        $('#id_article_list').remove();
+        $('#id_article_list, #id_article_list_tip, #id_article_list_title').remove();
     };
     var word = XINZHUAN.words[month-1][pointIndex];
     var wordChart = $('<h3 id="id_word_chart_title">Word frequency ( Monthly )</h3><p id="id_word_chart_tip" class="text-info"> * TIPS2: Click point search news which contain <strong>'+ word.english +'</strong> ('+ word.word +').</p><img id="id_loading" src="/static/css/loading.gif" /><div id="id_word_chart"></div>');
@@ -109,7 +107,7 @@ function renderWordData(month, pointIndex){
 
         $('#id_word_chart').bind('jqplotDataClick', 
             function (ev, seriesIndex, pointIndex, data) {
-                var articleList = $('<h3>Article List</h3><img id="id_loading" src="/static/css/loading.gif" /><div id="id_article_list"></div>');
+                var articleList = $('<h3 id="id_article_list_title">Article List</h3><img id="id_loading" src="/static/css/loading.gif" /><div id="id_article_list"></div>');
                 $('#id_article_list').prev().remove();
                 $('#id_article_list').remove();
 

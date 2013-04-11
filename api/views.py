@@ -1,5 +1,6 @@
 # -*- coding:utf-8 -*-
 from django.db.models import Count, Sum, Q
+from django.core.cache import get_cache
 from django.core import serializers
 from django.core.paginator import Paginator
 from django.contrib.auth.models import User
@@ -121,15 +122,21 @@ class Apis():
             medium_id = int(request.POST.get('medium_id'))
             word_frequency_sum_list = []
             month_list = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
-            for i in range(12):
 
-                start_date  = originated_date + relativedelta(months=+i)
-                end_date    = originated_date + relativedelta(months=+i+1)
-                word_frequency_sum = Word.objects.filter(word=word).filter(medium_id=medium_id).filter(publication_date__gt=start_date).filter(publication_date__lt=end_date).aggregate(sum=Sum('frequency'))['sum'] or 0
+            cache = get_cache('default')
+            data = cache.get(word)
+            if not data:
+                for i in range(12):
+                    start_date  = originated_date + relativedelta(months=+i)
+                    end_date    = originated_date + relativedelta(months=+i+1)
+                    word_frequency_sum = Word.objects.filter(word=word).filter(medium_id=medium_id).filter(publication_date__gt=start_date).filter(publication_date__lt=end_date).aggregate(sum=Sum('frequency'))['sum'] or 0
 
-                word_frequency_sum_list.append(['%s 1' % month_list[i], word_frequency_sum])
+                    word_frequency_sum_list.append(['%s 1' % month_list[i], word_frequency_sum])
 
-            return self._response(word_frequency_sum_list)
+                data = word_frequency_sum_list
+                cache.set(word, data, 3600)
+
+            return self._response(data)
 
         def list():
             originated_date = datetime.datetime.strptime('2012-01-01', '%Y-%m-%d')
