@@ -134,7 +134,7 @@ class Apis():
                     word_frequency_sum_list.append(['%s 1' % month_list[i], word_frequency_sum])
 
                 data = word_frequency_sum_list
-                cache.set(word, data, 3600)
+                cache.set(word, data)
 
             return self._response(data)
 
