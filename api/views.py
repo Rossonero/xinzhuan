@@ -87,26 +87,32 @@ class Apis():
         INTERFACES = { i : i + '()' for i in ['detail', 'monthly_keywords', 'edit', 'list', 'word'] }
 
         def monthly_keywords():
-            data = {}
-            data['timeline'] = {"type":"default","startDate":"2012",}
-            data['timeline']['date'] = []
-
-            originated_date = datetime.datetime.strptime('2012-01-01', '%Y-%m-%d')
             medium_id = int(request.GET.get('medium_id'))
-            monthly_chart_data = []
-            for i in range(1, 13):
-                start_date  = originated_date + relativedelta(months=+i-1)
-                words       = HotWord.objects.filter(medium_id=medium_id).filter(month=i)
+            cache = get_cache('default')
+            cache_data = cache.get(medium_id)
+            if not cache_data:
+                data = {}
+                data['timeline'] = {"type":"default","startDate":"2012",}
+                data['timeline']['date'] = []
 
-                monthly_chart_data = ['["%s<br/>(%s)",%d]' % ( word.english[:12], word.word, word.monthly_frequency)  for word in words]
-                monthly_words_data = ['{"word" : "%s", "english" : "%s"}' % (word.word, word.english) for word in words]
+                originated_date = datetime.datetime.strptime('2012-01-01', '%Y-%m-%d')
+                monthly_chart_data = []
+                for i in range(1, 13):
+                    start_date  = originated_date + relativedelta(months=+i-1)
+                    words       = HotWord.objects.filter(medium_id=medium_id).filter(month=i)
 
-                data['timeline']['date'].append({
-                    'startDate' : start_date.strftime('%Y,%m'),
-                    'headline' : 'Frequent word on %s' % start_date.strftime('%B'),
-                    'text': '<div id="id_chart_'+str(i)+'" style="width:900px; height:260px;margin-left:-100px;"></div>' + 
-                            '<script>$.jqplot("id_chart_'+str(i)+'", [['+','.join(monthly_chart_data)+']], {seriesDefaults:{renderer:$.jqplot.BarRenderer,rendererOptions: {varyBarColor: true}},axes:{xaxis:{renderer: $.jqplot.CategoryAxisRenderer}}}); XINZHUAN.words['+str(i-1)+'] = ['+','.join(monthly_words_data)+'];</script>'
-                })
+                    monthly_chart_data = ['["%s<br/>(%s)",%d]' % ( word.english[:12], word.word, word.monthly_frequency)  for word in words]
+                    monthly_words_data = ['{"word" : "%s", "english" : "%s"}' % (word.word, word.english) for word in words]
+
+                    data['timeline']['date'].append({
+                        'startDate' : start_date.strftime('%Y,%m'),
+                        'headline' : 'Frequent word on %s' % start_date.strftime('%B'),
+                        'text': '<div id="id_chart_'+str(i)+'" style="width:900px; height:260px;margin-left:-100px;"></div>' + 
+                                '<script>$.jqplot("id_chart_'+str(i)+'", [['+','.join(monthly_chart_data)+']], {seriesDefaults:{renderer:$.jqplot.BarRenderer,rendererOptions: {varyBarColor: true}},axes:{xaxis:{renderer: $.jqplot.CategoryAxisRenderer}}}); XINZHUAN.words['+str(i-1)+'] = ['+','.join(monthly_words_data)+'];</script>'
+                    })
+                    cache.set(medium_id, data)
+            else:
+                data = cache_data
 
             response = json.dumps(data)
 
@@ -124,7 +130,9 @@ class Apis():
             month_list = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
 
             cache = get_cache('default')
-            data = cache.get(word)
+            key = str(medium_id) + unicode(word)
+            print key
+            data = cache.get(key)
             if not data:
                 for i in range(12):
                     start_date  = originated_date + relativedelta(months=+i)
@@ -134,7 +142,7 @@ class Apis():
                     word_frequency_sum_list.append(['%s 1' % month_list[i], word_frequency_sum])
 
                 data = word_frequency_sum_list
-                cache.set(word, data)
+                cache.set(key, data)
 
             return self._response(data)
 
