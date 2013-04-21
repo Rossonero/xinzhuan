@@ -26,6 +26,7 @@ import time
 import urllib
 import re
 import datetime
+import ast
 
 from dateutil.relativedelta import relativedelta
 
@@ -124,27 +125,10 @@ class Apis():
 
         def word():
             word = request.REQUEST.get('word')
-            originated_date = datetime.datetime.strptime('2012-01-01', '%Y-%m-%d')
-            medium_id = int(request.POST.get('medium_id'))
-            word_frequency_sum_list = []
-            month_list = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
-
-            cache = get_cache('default')
-            key = str(medium_id) + unicode(word)
-            print key
-            data = cache.get(key)
-            if not data:
-                for i in range(12):
-                    start_date  = originated_date + relativedelta(months=+i)
-                    end_date    = originated_date + relativedelta(months=+i+1)
-                    word_frequency_sum = Word.objects.filter(word=word).filter(medium_id=medium_id).filter(publication_date__gt=start_date).filter(publication_date__lt=end_date).aggregate(sum=Sum('frequency'))['sum'] or 0
-
-                    word_frequency_sum_list.append(['%s 1' % month_list[i], word_frequency_sum])
-
-                data = word_frequency_sum_list
-                cache.set(key, data)
-
-            return self._response(data)
+            medium_id = request.REQUEST.get('medium_id')
+            hot_word = HotWord.objects.filter(medium_id=medium_id).filter(word=word).exclude(data=u'')[0]
+            print hot_word.data
+            return self._response(ast.literal_eval(hot_word.data))
 
         def list():
             originated_date = datetime.datetime.strptime('2012-01-01', '%Y-%m-%d')
@@ -187,7 +171,6 @@ class Apis():
             result = Medium.objects.all().order_by('name')[(page-1)*30:page*30]
             ms = []
             for medium in result:
-                print medium.language
                 ms.append({
                     'name' : medium.name,
                     'language' : medium.language or 'zh',

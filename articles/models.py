@@ -25,10 +25,10 @@ class Article(models.Model):
         for e in self.get_word_frequency():
             word, flag = e[0].split('/')
             try:
-                if e[-1] > 2 and len(word) >= 2:
+                if len(word) >2:
                     new_word, created = Word.objects.get_or_create(word=word, category=flag, article=self, publication_date=self.publication_date, medium=self.medium, frequency=e[-1])
             except:
-                print self.title
+                print e
 
 
 WORD_CATEGORY_CHOICE = (
@@ -51,6 +51,7 @@ class HotWord(models.Model):
     monthly_frequency= models.IntegerField()
     month            = models.IntegerField()
     medium           = models.ForeignKey(Medium)
+    data             = models.TextField(blank=True)
 
 # class ErrorWord(models.Model):
 #     wrong_word             = models.CharField(max_length=16)
