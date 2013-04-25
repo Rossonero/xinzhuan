@@ -127,7 +127,6 @@ class Apis():
             word = request.REQUEST.get('word')
             medium_id = request.REQUEST.get('medium_id')
             hot_word = HotWord.objects.filter(medium_id=medium_id).filter(word=word).exclude(data=u'')[0]
-            print hot_word.data
             return self._response(ast.literal_eval(hot_word.data))
 
         def list():
@@ -139,10 +138,12 @@ class Apis():
             start_date  = originated_date + relativedelta(months=+i)
             end_date    = originated_date + relativedelta(months=+i+1)
 
-            words       = Word.objects.filter(medium_id=medium_id).filter(word=word).filter(publication_date__gt=start_date).filter(publication_date__lt=end_date)
+            articles = Article.objects.filter(medium_id=medium_id).filter(publication_date__gt=start_date).filter(publication_date__lt=end_date).filter(content__contains=word)[:5]
+            # words       = Word.objects.filter(medium_id=medium_id).filter(word=word).filter(publication_date__gt=start_date).filter(publication_date__lt=end_date)
             article_list = []
-            for word in words[:20]:
-                article = model_to_dict(word.article)
+            # for word in words[:5]:
+            for a in articles:
+                article = model_to_dict(a)
                 article['summary'] = article['content'][:200] + '...'
                 article_list.append(article)
             return self._response(article_list)

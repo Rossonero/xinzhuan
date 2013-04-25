@@ -56,7 +56,7 @@ def filter_word(medium_id):
     # words = Word.objects.filter
 
 def trans():
-    all_hot_word = HotWord.objects.filter(english=u'').values_list('word', flat=True)
+    all_hot_word = HotWord.objects.filter(medium_id=1399).values_list('word', flat=True)
 
     d = []
     for w in list(set(all_hot_word)):
@@ -73,17 +73,18 @@ def trans():
 
 
 if __name__ == '__main__':
-    # d = []
-    # for hot_word in HotWord.objects.filter(pk__gt=11):
-    #     if hot_word.word in d:
-    #         continue
-    #     d.append(hot_word.word)
-    #     data = get_data(hot_word)
-    #     hot_word.data = data
-    #     hot_word.save()
+    # generate_monthly_keywords(1399)
+    d = []
+    for hot_word in HotWord.objects.filter(medium_id=1399):
+        if hot_word.word in d:
+            continue
+        d.append(hot_word.word)
+        data = get_data(hot_word)
+        hot_word.data = data
+        hot_word.save()
     # for w in [{"word": "南方周末","data": ""}, {"word": "为什么","data": ""}, {"word": "负责人","data": ""}, {"word": "工作人员","data": ""}, {"word": "俄罗斯","data": ""}, {"word": "越来越","data": ""}, {"word": "方舟子","data": ""}, {"word": "菲律宾","data": ""}, {"word": "开发商","data": ""}, {"word": "钓鱼岛","data": ""}, {"word": "航天员","data": ""}, {"word": "奥巴马","data": ""}, {"word": "委员会","data": ""}, {"word": "奥运会","data": ""}, {"word": "温州市","data": ""}, {"word": "罗姆尼","data": ""}, {"word": "候选人","data": ""}, {"word": "民主党","data": ""}, {"word": "飞行员","data": ""}, {"word": "十八大","data": ""}]:
     #     hot_word = HotWord.objects.filter(medium_id=1836).filter(word=w['word'])[0]
     #     data = get_data(hot_word)
     #     hot_word.data = data
     #     hot_word.save()
-    trans()
+    # trans()

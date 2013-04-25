@@ -343,7 +343,10 @@ class Spiders():
         for title in soup.find('div', {'id' : 'BT'}).find_all('a'):
 
             article_page_url = urljoin(url, title.get('href'))
-            article_page = bs4.BeautifulSoup( requests.get(article_page_url).content)
+            r = requests.get(article_page_url)
+            if r.status_code == 404:
+                continue
+            article_page = bs4.BeautifulSoup( r.content)
 
             if Article.objects.filter(medium=medium).filter(url=article_page_url).count():
                 article = Article.objects.filter(medium=medium).get(url=article_page_url)
