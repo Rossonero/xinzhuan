@@ -55,6 +55,23 @@ def filter_word(medium_id):
     print hot_word
     # words = Word.objects.filter
 
+def trans():
+    all_hot_word = HotWord.objects.filter(english=u'').values_list('word', flat=True)
+
+    d = []
+    for w in list(set(all_hot_word)):
+        if w in d:
+            continue
+
+        r = requests.post('http://127.0.0.1:8000/api/tools/translation.json', {'content' : w})
+        try:
+            e = r.json()['response']['result']
+        except:
+            print w
+        hot_word = HotWord.objects.filter(word=w).update(english=e)
+        d.append(w)
+
+
 if __name__ == '__main__':
     # d = []
     # for hot_word in HotWord.objects.filter(pk__gt=11):
@@ -64,8 +81,9 @@ if __name__ == '__main__':
     #     data = get_data(hot_word)
     #     hot_word.data = data
     #     hot_word.save()
-    for w in [{"word": "农民工","data": ""}, {"word": "进一步","data": ""}, {"word": "志愿者","data": ""}, {"word": "越来越","data": ""}, {"word": "幼儿园","data": ""}, {"word": "社会主义","data": ""}, {"word": "消费者","data": ""}, {"word": "负责人","data": ""}, {"word": "叙利亚","data": ""}, {"word": "俄罗斯","data": ""}, {"word": "大学生","data": ""}, {"word": "本报讯","data": ""}, {"word": "共青团","data": ""}, {"word": "青少年","data": ""}, {"word": "新华社","data": ""}, {"word": "中国青年报","data": ""}, {"word": "为什么","data": ""}, {"word": "全国政协","data": ""}, {"word": "人大代表","data": ""}, {"word": "学雷锋","data": ""}, {"word": "胡锦涛","data": ""}, {"word": "雷锋精神","data": ""}, {"word": "委员会","data": ""}, {"word": "工作人员","data": ""}, {"word": "年轻人","data": ""}, {"word": "有限公司","data": ""}, {"word": "总书记","data": ""}, {"word": "团组织","data": ""}, {"word": "航天员","data": ""}, {"word": "毕业生","data": ""}, {"word": "奥运会","data": ""}, {"word": "运动员","data": ""}, {"word": "钓鱼岛","data": ""}, {"word": "国务院","data": ""}, {"word": "十八大","data": ""}, {"word": "中国共产党","data": ""}, {"word": "发展观","data": ""}, {"word": "小康社会","data": ""}, {"word": "现代化","data": ""}, {"word": "互联网","data": ""}]:
-        hot_word = HotWord.objects.filter(medium_id=1836).filter(word=w['word'])[0]
-        data = get_data(hot_word)
-        hot_word.data = data
-        hot_word.save()
+    # for w in [{"word": "南方周末","data": ""}, {"word": "为什么","data": ""}, {"word": "负责人","data": ""}, {"word": "工作人员","data": ""}, {"word": "俄罗斯","data": ""}, {"word": "越来越","data": ""}, {"word": "方舟子","data": ""}, {"word": "菲律宾","data": ""}, {"word": "开发商","data": ""}, {"word": "钓鱼岛","data": ""}, {"word": "航天员","data": ""}, {"word": "奥巴马","data": ""}, {"word": "委员会","data": ""}, {"word": "奥运会","data": ""}, {"word": "温州市","data": ""}, {"word": "罗姆尼","data": ""}, {"word": "候选人","data": ""}, {"word": "民主党","data": ""}, {"word": "飞行员","data": ""}, {"word": "十八大","data": ""}]:
+    #     hot_word = HotWord.objects.filter(medium_id=1836).filter(word=w['word'])[0]
+    #     data = get_data(hot_word)
+    #     hot_word.data = data
+    #     hot_word.save()
+    trans()

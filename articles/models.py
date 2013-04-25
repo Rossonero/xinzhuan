@@ -47,7 +47,7 @@ class Word(models.Model):
 
 class HotWord(models.Model):
     word             = models.CharField(max_length=16)
-    english          = models.CharField(max_length=64, blank=True)
+    english          = models.CharField(max_length=256, blank=True)
     monthly_frequency= models.IntegerField()
     month            = models.IntegerField()
     medium           = models.ForeignKey(Medium)

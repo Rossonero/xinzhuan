@@ -22,7 +22,7 @@
     <div class="span2 offset2">
         {% if medium.id == 1081 %}<a href="http://img.xinzhuan.info/scans/1081/2012071701.jpg" target="_blank"><img class="thumbnail" width="200" src="http://img.xinzhuan.info/scans/1081/2012071701.jpg!medium"/></a>
         {% else %}
-        <img class="thumbnail" width="200" src="http://img.xinzhuan.info/scans/{{medium.id}}/{{medium.cover_date|date:"Ymd"}}01.jpg!medium"/>
+        <a href="http://img.xinzhuan.info/scans/{{medium.id}}/{{medium.cover_date|date:"Ymd"}}01.jpg" target="_blank"><img class="thumbnail" width="200" src="http://img.xinzhuan.info/scans/{{medium.id}}/{{medium.cover_date|date:"Ymd"}}01.jpg!medium"/></a>
         {% endif %}
     </div>
 </div>

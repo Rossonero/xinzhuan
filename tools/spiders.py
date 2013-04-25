@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from django.forms.models import model_to_dict
 
 import os
 import sys
@@ -8,12 +9,14 @@ import re
 import datetime
 from urlparse import urljoin
 from subprocess import Popen, PIPE
-
+import threading
 sys.path.append('/home/perchouli/workspaces/xinzhuan')
 
 from media.models import Medium, Unit
 from journalists.models import Journalist
 from articles.models import Article
+
+START_DATE = datetime.datetime.strptime('2012-01-01', '%Y-%m-%d')
 
 class Spiders():
 
@@ -187,7 +190,7 @@ class Spiders():
 
 
     def zgqnb(self):
-        start_date = datetime.datetime.strptime('2012-01-01', '%Y-%m-%d')
+        start_date = START_DATE
         for i in range(23,366):
             publication_date = start_date + datetime.timedelta(days=i)
             url = 'http://zqb.cyol.com/html/%s/nbs.D110000zgqnb_01.htm' % (datetime.datetime.strftime(publication_date, '%Y-%m/%d'))
@@ -262,6 +265,124 @@ class Spiders():
                 article.save()
                 # break
             # break
+
+    def qlwb(self):
+        start_date = START_DATE
+        # issue = 8638
+        # issue = 8648 Error page太长
+        issue = 8985
+        for i in range(354, 366):
+            print 'i == %d' % i 
+            publication_date = start_date + datetime.timedelta(days=i)
+            url = 'http://epaper.qlwb.com.cn/qlwb/content/%s/PageA01TB.htm' % (datetime.datetime.strftime(publication_date, '%Y%m%d'))
+
+            _date = str(publication_date).split(' ')[0]
+            print _date
+
+            if _date  in ['2012-03-31', '2012-07-28', '2012-10-08']:
+                url = 'http://epaper.qlwb.com.cn/qlwb/content/%s/PageA02TB.htm' % (datetime.datetime.strftime(publication_date, '%Y%m%d'))
+
+            if _date  == '2012-04-05':
+                url = 'http://epaper.qlwb.com.cn/qlwb/content/%s/PageA002-29TB.htm' % (datetime.datetime.strftime(publication_date, '%Y%m%d'))
+
+            if _date  in ['2012-05-30', '2012-06-18', '2012-09-26'] :
+                url = 'http://epaper.qlwb.com.cn/qlwb/content/%s/PageA001TB.htm' % (datetime.datetime.strftime(publication_date, '%Y%m%d'))
+            
+            if _date  == '2012-08-11':
+                url = 'http://epaper.qlwb.com.cn/qlwb/content/%s/PageA04TB.htm' % (datetime.datetime.strftime(publication_date, '%Y%m%d'))
+
+
+            r = requests.get(url)
+            if r.status_code == 404:
+                r = requests.get(
+                    'http://epaper.qlwb.com.cn/qlwb/content/%s/PageT01TB.htm' % (datetime.datetime.strftime(publication_date, '%Y%m%d'))
+                    )
+            
+            try:
+                soup = bs4.BeautifulSoup(r.content).find('div', {'id' : 'bmdh'})
+                pages = soup.find_all('tr')
+            except:
+                continue
+
+            print url
+            for page in pages:
+                page_url = urljoin(url, page.find('a').get('href'))
+                try:
+                    titles = bs4.BeautifulSoup(requests.get(page_url).content).find('div', {'id' : 'btdh'}).find_all('a')
+                except:
+                    continue
+                for title in titles:
+                    article_url = urljoin(url, title.get('href'))
+                    try:
+                        self._get_qlwb_article(article_url, publication_date, issue, page.text.strip())
+                    except:
+                        continue
+
+            issue = issue + 1
+
+
+    def whb(self, start_date, end_date):
+        issue = 23443  
+        s = datetime.datetime.strptime('2012-' + start_date, '%Y-%m-%d')
+        e = datetime.datetime.strptime('2012-' + end_date, '%Y-%m-%d')
+        for i in range((s-START_DATE).days, (e-START_DATE).days+1):
+            publication_date = START_DATE + datetime.timedelta(days=i)
+            url = 'http://wenhui.news365.com.cn/ewenhui/whb/html/%s/node_2.htm' % (datetime.datetime.strftime(publication_date, '%Y-%m/%d'))
+            print url
+            soup = bs4.BeautifulSoup(requests.get(url).content)
+            pages = soup.find('div', {'id' : 'BM'}).find_all('li')
+
+            for page in pages:
+                self._get_whb_article(urljoin(url, page.find_all('a')[-1].get('href')), publication_date, issue+i, page)
+    
+            # print str(i) + '|' + soup.find('span', {'class' : 'time'}).text
+
+    def _get_whb_article(self, url, date,issue, page):
+        medium = Medium.objects.get(pk=1399)
+        soup = bs4.BeautifulSoup(requests.get(url).content)
+        for title in soup.find('div', {'id' : 'BT'}).find_all('a'):
+
+            article_page_url = urljoin(url, title.get('href'))
+            article_page = bs4.BeautifulSoup( requests.get(article_page_url).content)
+
+            if Article.objects.filter(medium=medium).filter(url=article_page_url).count():
+                article = Article.objects.filter(medium=medium).get(url=article_page_url)
+            else:
+                article = Article()
+                article.medium = medium
+
+                article.url = article_page_url
+                article.publication_date = date
+                article.page = page.text.strip()
+                article.issue = issue
+
+            print article_page_url
+            title = article_page.title.text.strip().replace(u'文汇报 - ', '')
+            article.title = title
+            article.content = article_page.find('div', {'id' : 'articleText'}).text.strip().replace(u'　　', '\n  ')
+            article.save()
+
+
+    def _get_qlwb_article(self, url, date, issue, page):
+        print page
+        medium = Medium.objects.get(pk=1025)
+        soup = bs4.BeautifulSoup(requests.get(url).content)
+
+        if Article.objects.filter(medium=medium).filter(url=url).count():
+            article = Article.objects.filter(medium=medium).get(url=url)
+        else:
+            article = Article()
+
+            article.medium = medium
+            article.title = soup.find('td', {'class' : 'font01'}).text.strip().replace(u'　　', '\n  ')
+
+            article.url = url
+            article.publication_date = date
+            article.page = page
+            article.issue = issue
+            
+        article.content = soup.find('span', {'id' : 'contenttext'}).text.strip().replace(u'　　', '\n  ')
+        article.save()
 
     def _get_nfzm_article(self, url, date, issue):
         medium = Medium.objects.get(pk=951)
@@ -375,4 +496,4 @@ class Spiders():
 
 if __name__ == '__main__':
     s = Spiders()
-    s.zgqnb()
+    s.whb(sys.argv[1],sys.argv[2])

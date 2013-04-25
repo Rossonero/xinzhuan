@@ -135,7 +135,7 @@ INSTALLED_APPS = (
     'journalists',
     'media',
     'misc',
-
+    'duoshuo'
 )
 
 # A sample logging configuration. The only tangible logging
@@ -175,4 +175,11 @@ except IOError:
 PAGINATION_SETTINGS = {
     'PAGE_RANGE_DISPLAYED': 10,
     'MARGIN_PAGES_DISPLAYED': 2,
+}
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+        'LOCATION': '127.0.0.1:11211',
+    }   
 }

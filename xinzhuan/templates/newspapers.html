@@ -16,7 +16,7 @@ ul li {float: left;}
 {% for newspaper in newspapers %}
 <div class="row newspaper">
     <div class="span6">
-        <img src="/static/img/{{newspaper.id}}.jpg" width="350" class="img-polaroid"/>
+        <a href="/newspapers/{{newspaper.id}}/"><img src="/static/img/{{newspaper.id}}.jpg" width="350" class="img-polaroid"/></a>
         <p class="date">Front page on {{newspaper.cover_date|date:"d M Y"}} </p>
     </div>
     <div class="span6 info">
