@@ -3,6 +3,13 @@
 {% block title %} {{medium.english_name}} - Chinese Newspaper Analysis {% endblock %}
 
 {% block content %}
+
+<div class="chart-nav" style="width: 50px; position:fixed;right:0px">
+    <a href="#timeline-embed" class="bar"><img src="/static/img/ico/chart_bar.png" width="48" height="48" /></a>
+    <a href="#id_word_chart" class="line"><img src="/static/img/ico/chart_line.png" width="48" height="48" /></a>
+    <a href="#id_article_list_title" class="articles"><img src="/static/img/ico/article_list.png" width="48" height="48" /></a>
+</div>
+
 <div class="row">
     <div class="span8 summary">
         <h2><i>{{medium.english_name}}</i></h2>
