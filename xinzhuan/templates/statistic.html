@@ -9,9 +9,9 @@
     <section class="statistic-filter">
         <h2>Filter</h2>
         <ul class="province-tags">
-            <li {% if region.en == "People's Republic of China" %}class="active" {% endif %}><a href="{% url statistic '' %}">All</a></li>
+            <li {% if region.en == "People's Republic of China" %}class="active" {% endif %}><a href="{% url 'statistic' 'all' %}">All</a></li>
             {% for province in provinces %}
-            <li {% if province.en == region.en %}class="active" {% endif %}><a href="{% url statistic province.en %}">{{province.en}}</a></li>
+            <li {% if province.en == region.en %}class="active" {% endif %}><a href="{% url 'statistic' province.en %}">{{province.en}}</a></li>
             {% endfor %}
         </ul>
         <div class="clearfix"></div>
