@@ -115,7 +115,7 @@ function renderWordData(month, pointIndex){
         $('#id_word_chart').bind('jqplotDataClick', 
             function (ev, seriesIndex, pointIndex, data) {
                 var articleList = $('<h3 id="id_article_list_title">Article List</h3><img class="loading" src="/static/css/loading.gif" /><div id="id_article_list"></div>');
-                $('#id_article_list').prev().remove();
+                $('#id_article_list_title').remove();
                 $('#id_article_list').remove();
 
                 articleList.insertAfter($('#id_word_chart'));
